@@ -84,6 +84,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server
 die( \f\end2('Произошло что то не то', false) );
 
 
+
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_list654') {
 
     $dops = array(
