@@ -36,10 +36,12 @@ class IikoOborot {
     public static $db_login = '';
     public static $db_pass = '';
     
+    public static $db_connect = null;
+    
     public static $show_html = false;
 
-    public static function loadOborotFromServer($sp_key, $date) {
-
+    public static function connectDb() {
+        
         $dops = array(
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
@@ -56,6 +58,15 @@ class IikoOborot {
                 , $dops
         );
 
+        self::$db_connect = $db7;
+
+    }
+
+    public static function loadOborotFromServer($sp_key, $date) {
+
+        if( empty(self::$db_connect) )
+        self::connectDb();
+        
         $sql = 'SELECT '
                 . ' dbo.OrderPaymentEvent.date '
                 . ' , '
@@ -183,7 +194,7 @@ class IikoOborot {
                 WHERE 
                 '
                 .
-                ' restaurantSection = \'' . ( $_REQUEST['sp_key_iiko'] ?? 'f939f35f-c169-4be9-9933-5af230748ede' ) . '\' '
+                ' restaurantSection = \'' . $sp_key . '\' '
                 . ' AND date = \'' . date('Y-m-d', strtotime($date)) . '\' '
                 . ' ORDER BY prechequeTime ASC '
         ;
@@ -191,7 +202,7 @@ class IikoOborot {
         if ( self::$show_html === true )
             echo '<pre>' . $sql . '</pre>';
 
-        $ff = $db7->prepare($sql);
+        $ff = self::$db_connect->prepare($sql);
 
         $ff->execute();
 
@@ -386,7 +397,7 @@ class IikoOborot {
         if ( self::$show_html === true )
             echo '<pre>' . $sql . '</pre>';
 
-        $ff = $db7->prepare($sql);
+        $ff = self::$db_connect->prepare($sql);
         $ff->execute();
 
         if ( self::$show_html === true )
@@ -468,7 +479,7 @@ class IikoOborot {
             throw new \Exception('не получилось получить сумму оборота за сутки');
         }
         
-        return \f\end2('получили данные по обороту точки', true, array(
+        return \f\end3('получили данные по обороту точки', true, array(
             'oborot' => (int) ( $sum + $sum2 ),
             'plus' => (int) $sum,
             'minus' => (int) $sum2
