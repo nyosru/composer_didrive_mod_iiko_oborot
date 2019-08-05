@@ -22,8 +22,6 @@ if (isset($_GET['show_get']) && $_GET['show_get'] = 'da') {
 }
 
 
-
-
 if (isset($_GET['show_request']) && $_GET['show_request'] = 'da') {
     echo '<input type=text value="https://' . $_SERVER['HTTP_HOST'] . '' . $_SERVER['REQUEST_URI'] . '" style="width:100%;padding:3px;" ><br/><br/>';
 }

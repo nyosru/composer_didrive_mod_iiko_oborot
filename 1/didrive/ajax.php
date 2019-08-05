@@ -115,12 +115,8 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_for_sps') {
         }
     }
 
-
     if (isset($_REQUEST['get_sp_load'])) {
-        
-        
-        
-        
+
         $timers = \Nyos\mod\items::getItemsSimple($db, $mod_list_time_lastload);
         //\f\pa($timers);
         foreach ($timers['data'] as $k => $v) {
@@ -290,12 +286,12 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
 
 
         if (1 == 1 && class_exists('\Nyos\Msg')) {
-            
+
             if (!isset($vv['admin_ajax_job'])) {
                 require_once DR . '/sites/' . \Nyos\nyos::$folder_now . '/config.php';
             }
 
-            $e = 'Подгружаем данные по обороту '. ( !empty($sp_site_name) ? '('.$sp_site_name.')' : '' ).' за день ' . date('y-m-d', strtotime($date))
+            $e = 'Подгружаем данные по обороту ' . (!empty($sp_site_name) ? '(' . $sp_site_name . ')' : '' ) . ' за день ' . date('y-m-d', strtotime($date))
                     . PHP_EOL
                     . ' oborot: ' . $ret['data']['oborot']
                     . PHP_EOL
@@ -305,14 +301,14 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
                     . PHP_EOL
                     . ' минус: ' . $ret['data']['minus']
                     . PHP_EOL
-                    // . sizeof($in3);
+            // . sizeof($in3);
             ;
             \nyos\Msg::sendTelegramm($e, null, 1);
             //\f\pa($vv['admin_ajax_job']);
             if (isset($vv['admin_ajax_job'])) {
                 foreach ($vv['admin_ajax_job'] as $k => $v) {
                     //\nyos\Msg::sendTelegramm($e, $v);
-                    \nyos\Msg::sendTelegramm( $e, $v );
+                    \nyos\Msg::sendTelegramm($e, $v);
                 }
             }
         }
