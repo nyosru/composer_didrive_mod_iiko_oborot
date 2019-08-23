@@ -86,7 +86,7 @@ foreach (\Nyos\Nyos::$menu as $k => $v) {
 
 
 
-
+//\f\pa($_REQUEST);
 
 
 
@@ -125,6 +125,43 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_for_sps') {
         }
     }
 
+    
+    /*
+24-07-2019 // 25-07 // 26-07 // 28-07-2019 - 29-07
+     * 3c93fc45-485a-46cb-9ee6-0399eb27148f - 31274 - тт7
+     * 1cacedf6-f411-497b-b44e-18c73b813fd7 --
+     * 6f475233-a2b3-4d64-a173-1bf4831a7fd2 31816 // 31497 // 37678 //  - 36736 - 37040 ++ 
+     * 731c2594-a97e-4db2-90ea-1c9ba8402437 --
+     * 693e7f4f-ebc8-410f-b13e-25b54a62216f --
+     * 365f9152-1d18-4776-a8c9-2ba39ee4f3cc --
+     * ce82d80e-8158-4a98-a98d-2ff167d4de6b --
+     * 723d4eec-900d-43e5-86a5-33bfe7d4944d --
+     * 9a720aba-478a-4787-8031-33d8f80a544a 33655 // 30928 // 39948 //  - 34599 - 27215 ++
+     * 5237f417-19b7-4774-9298-356eccf001b0 --
+     * afe2c3ee-e3e5-4b91-9eef-38b61086ad18 --
+     * 9e3b1014-9285-415b-9a2d-4073c0598cef --
+     * 1260ef55-f434-4576-aa03-47077a8ca0d0 37675 // 58364 // 80983 // - 58481 - 42503 + 41803
+     * 2bc3b2e7-62f7-4839-991e-4789fc5a43b6 --
+     * 16f98ffb-526e-4562-a7bb-4c3a779b2194 - 81256 - 59943 + 59689 тт3
+     * f06da035-02f0-49ae-b16f-51f0a1d01b6f 21354 // 29466 // 40228 // - 17108 - 20864 ++
+     * 80d0cc1f-233a-432e-9db7-588e73a97e02 - 39874 - 33477 + 32240 тт8
+     * eba3487f-db68-4084-a752-642ae0e73616 --
+     * efac5394-ef56-4c43-adeb-6a849e0024d4 32472 // 36525 // 38570 // - 26629 - 29244 ++
+     * 08f510f7-660f-4064-b52a-72a0643761bc 25080 // 29707 // 33530 //  - 27581 - 24062 + 23580
+     * 5e55c65f-4ef9-4127-acd3-765cc55a2cc0 --
+     * 4c360162-6e12-da32-0145-88f5ce8c0087 --
+     * 3ce15261-b48a-4373-b44e-8dbb62274901 30133 // 27829 // 28630 //  - 32415 - 26240 + 24632
+     * 593961aa-fcce-495c-82ea-a597d5cf4dd5 --
+     * 07537f97-f152-490f-9d95-a6a259cab694 --
+     * 2a3280c0-7292-415d-8d1f-c47f8cf7b52b --
+     * d12d22b8-753e-4b90-8aeb-d32246ae6057 54617 // 40549 // - 43424 - 31715 + 31580
+     * cc7c9a77-e356-4a2e-b52e-dc88b377e222 --
+     * 48c62350-dc1c-4e3a-929f-de4d7c77c984 17928 // 22120 //  - 24488 - 25349 ++
+     * 3f7ab84e-4477-4186-9d72-e21c08f6e6d8 -- 
+     * b71407a7-d94d-423c-9eb7-e2d2a8884fa3 24461 // 29918 // - 21025 - 20123 ++
+     * 7ea67556-6935-4283-83af-f67e0adba56c 36375 // 23287 // - 30787 - 19035 ++
+     */
+    
 
 //\f\pa($_SERVER);
     //\f\pa($_SERVER['REDIRECT_QUERY_STRING']);
@@ -132,7 +169,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_for_sps') {
     if (!isset($_REQUEST['hide_form'])) {
 
         $ll = '
-3c93fc45-485a-46cb-9ee6-0399eb27148f
+3c93fc45-485a-46cb-9ee6-0399eb27148f ТТ-7
 1cacedf6-f411-497b-b44e-18c73b813fd7
 6f475233-a2b3-4d64-a173-1bf4831a7fd2
 731c2594-a97e-4db2-90ea-1c9ba8402437
@@ -148,23 +185,23 @@ afe2c3ee-e3e5-4b91-9eef-38b61086ad18
 2bc3b2e7-62f7-4839-991e-4789fc5a43b6
 16f98ffb-526e-4562-a7bb-4c3a779b2194
 f06da035-02f0-49ae-b16f-51f0a1d01b6f
-80d0cc1f-233a-432e-9db7-588e73a97e02
-f939f35f-c169-4be9-9933-5af230748ede ТТ1
+80d0cc1f-233a-432e-9db7-588e73a97e02 ТТ-8
+f939f35f-c169-4be9-9933-5af230748ede ТТ-1
 eba3487f-db68-4084-a752-642ae0e73616
 efac5394-ef56-4c43-adeb-6a849e0024d4
 08f510f7-660f-4064-b52a-72a0643761bc
 5e55c65f-4ef9-4127-acd3-765cc55a2cc0
 4c360162-6e12-da32-0145-88f5ce8c0087
 3ce15261-b48a-4373-b44e-8dbb62274901
-8e5f876b-7b41-45ac-b01b-9311c552bb33
-121dbeec-d7fb-4c9c-9966-a2c68e496958
+8e5f876b-7b41-45ac-b01b-9311c552bb33 ТТ-5
+121dbeec-d7fb-4c9c-9966-a2c68e496958 ТТ-4
 593961aa-fcce-495c-82ea-a597d5cf4dd5
 07537f97-f152-490f-9d95-a6a259cab694
 2a3280c0-7292-415d-8d1f-c47f8cf7b52b
 d12d22b8-753e-4b90-8aeb-d32246ae6057
 cc7c9a77-e356-4a2e-b52e-dc88b377e222
 48c62350-dc1c-4e3a-929f-de4d7c77c984
-01d37b65-2399-4453-a8ad-e133026a397f
+01d37b65-2399-4453-a8ad-e133026a397f ТТ-6
 3f7ab84e-4477-4186-9d72-e21c08f6e6d8
 b71407a7-d94d-423c-9eb7-e2d2a8884fa3
 7ea67556-6935-4283-83af-f67e0adba56c
@@ -174,7 +211,7 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
         // \f\pa($list,2);
 
         echo '<form action="/vendor/didrive_mod/iiko_oborot/1/didrive/ajax.php" method=get >
-        <input type="date" name="date" value="" >
+        <input type="date" name="date" value="'.( $_GET['date'] ?? '' ).'" >
         <input type="hidden" name="action" value="get_oborot_for_sps" >
         <Br/>
         <Br/>
@@ -228,11 +265,8 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
             if (isset($v{5})) {
                 $l2 = explode(' ', $v);
 
-                if (isset($l2[1])) {
-                    echo '<option value="' . $l2[0] . '" >' . $l2[1] . '</option>';
-                } else {
-                    echo '<option>' . $l2[0] . '</option>';
-                }
+                    echo '<option value="' . $l2[0] . '" '.( isset($_GET['sp_key_iiko']) && $_GET['sp_key_iiko'] == $l2[0] ? ' selected' : '' ).'>' . ( $l2[1] ?? $l2[0] ) . '</option>';
+                    
             }
         }
 
@@ -251,16 +285,23 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
     if (empty($_REQUEST['date']))
         die('укажите дату');
 
+    //\f\pa($_REQUEST);
+    // \Nyos\mod\IikoOborot::$show_html = true;
+    
     $date = date('Y-m-d', strtotime($_REQUEST['date']));
 
-    $sp_id = $get_sp_d ?? $time_sp_key ?? $_REQUEST['key_iiko_from_sp'] ?? $_REQUEST['sp_key_iiko'] ?? false;
+    $sp_id = $_REQUEST['sp_key_iiko'] ?? $get_sp_d ?? $time_sp_key ?? $_REQUEST['key_iiko_from_sp'] ?? false;
 
-    // \f\pa($sp_id);
+    //\f\pa($sp_id);
     // echo '<br/>'.__FILE__.' '.__LINE__;
 
     if ($sp_id !== false) {
 
         \Nyos\mod\IikoOborot::$show_html = false;
+        
+        if( isset( $_REQUEST['show'] ) )
+        \Nyos\mod\IikoOborot::$show_html = true;
+        
         $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp_id, $date);
 
         // \f\pa($ret);
@@ -294,13 +335,23 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
             $e = 'Подгружаем данные по обороту ' . (!empty($sp_site_name) ? '(' . $sp_site_name . ')' : '' ) . ' за день ' . date('y-m-d', strtotime($date))
                     . PHP_EOL
                     . ' oborot: ' . $ret['data']['oborot']
+
                     . PHP_EOL
                     . ' из них '
+
+                    . PHP_EOL
+                    . ' скидки: ' . $ret['data']['skidki']
+
                     . PHP_EOL
                     . ' плюс: ' . $ret['data']['plus']
+                    
                     . PHP_EOL
                     . ' минус: ' . $ret['data']['minus']
+
                     . PHP_EOL
+                    . $sp_id
+                    
+//                    . PHP_EOL
             // . sizeof($in3);
             ;
             \nyos\Msg::sendTelegramm($e, null, 1);
