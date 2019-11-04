@@ -35,12 +35,13 @@ class IikoOborot {
     public static $db_base = '';
     public static $db_login = '';
     public static $db_pass = '';
+    
     public static $db_connect = null;
+    
     public static $show_html = false;
-    public static $cash = [];
 
     public static function connectDb() {
-
+        
         $dops = array(
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
@@ -58,15 +59,14 @@ class IikoOborot {
         );
 
         self::$db_connect = $db7;
+
     }
 
     public static function loadOborotFromServer($sp_key, $date) {
 
-        if (empty(self::$db_connect))
-            self::connectDb();
-
-        //echo '<br/>' . __FILE__ . ' #' . __LINE__;
-
+        if( empty(self::$db_connect) )
+        self::connectDb();
+        
         $sql = 'SELECT '
                 . ' dbo.OrderPaymentEvent.date '
                 . ' , '
@@ -193,29 +193,29 @@ class IikoOborot {
                     dbo.OrderPaymentEvent
                 WHERE 
                 '
-                . ' restaurantSection = \'' . $sp_key . '\' '
+                .
+                ' restaurantSection = \'' . $sp_key . '\' '
                 . ' AND date = \'' . date('Y-m-d', strtotime($date)) . '\' '
                 . ' ORDER BY prechequeTime ASC '
         ;
 
-        if (self::$show_html === true)
+        if ( self::$show_html === true )
             echo '<pre>' . $sql . '</pre>';
 
         $ff = self::$db_connect->prepare($sql);
 
         $ff->execute();
 
-        if (self::$show_html === true)
+        if ( self::$show_html === true )
             echo '<table cellpadding=10 border=1 >'; // <tr><td>1</td><td>2</td></tr>';
 
         $sum = 0;
-        $skidki = 0;
 
         $n = 1;
 
         while ($e = $ff->fetch()) {
 
-            if (self::$show_html === true) {
+            if ( self::$show_html === true ) {
                 if ($n == 1) {
                     echo '<tr>';
 
@@ -233,33 +233,19 @@ class IikoOborot {
                 $ar2 = $e;
             }
 
-
-            if ($e['orderSum'] > 0 && $e['sumCash'] == 0 && $e['sumCard'] == 0 && $e['orderSumAfterDiscount'] == 0) {
-                $skidki += $e['orderSum'];
-            }
-
-
-            if (self::$show_html === true)
+            if ( self::$show_html === true )
                 echo '<tr>';
 
             foreach ($e as $k => $v) {
 
-                if (self::$show_html === true)
+                if ( self::$show_html === true )
                     echo '<td>' . iconv('windows-1251', 'utf-8', $v) . '</td>';
 
-                if ($k == 'sumCard' || $k == 'sumCash') {
-                    // если сторнед == 1 то пропускаем
-                    if ($e['storned'] == 1) {
-                        
-                    }
-                    // если сторнед != 1 то считаем
-                    else {
-                        $sum += $v;
-                    }
-                }
+                if ($k == 'sumCard' || $k == 'sumCash')
+                    $sum += $v;
             }
 
-            if (self::$show_html === true)
+            if ( self::$show_html === true )
                 echo '</tr>';
 
 //$e['user'] = mb_convert_encoding($e['user'],'UTF-8','auto');
@@ -272,11 +258,10 @@ class IikoOborot {
         }
 //    \f\pa($e3);
 
-        if (self::$show_html === true) {
+        if ( self::$show_html === true ) {
             echo '</table>';
 
             echo '<p>Сумма ' . $sum . '</p>';
-            echo '<p>Скидки ' . $skidki . '</p>';
 
             \f\pa($ar2, 2, '', '$ar2');
         }
@@ -399,8 +384,8 @@ class IikoOborot {
                 FROM 
                     dbo.AccountingTransaction
                 WHERE '
-                . ' date = \'' . $date . '\' '
-                . ' AND num = \'' . $sp_key . '\' '
+                . ' date = \'' . $ar2['date'] . '\' '
+                . ' AND num = \'' . $ar2['session_number'] . '\' '
 
 //            . ' AND sum < 0 '
 //            . ' AND ( type = \'CARD\' OR type = \'CASH\' ) '
@@ -409,13 +394,13 @@ class IikoOborot {
 // .' AND created < \'' . date('Y-m-d 12:00:00', strtotime($date) + 3600 * 24) . '\' '
         ;
 
-        if (self::$show_html === true)
+        if ( self::$show_html === true )
             echo '<pre>' . $sql . '</pre>';
 
         $ff = self::$db_connect->prepare($sql);
         $ff->execute();
 
-        if (self::$show_html === true)
+        if ( self::$show_html === true )
             echo '<table cellpadding=10 border=1 >'; // <tr><td>1</td><td>2</td></tr>';
 
         $sum2 = 0;
@@ -424,7 +409,7 @@ class IikoOborot {
 
         while ($e = $ff->fetch()) {
 
-            if (self::$show_html === true) {
+            if ( self::$show_html === true ) {
                 if ($n == 1) {
                     echo '<tr>';
 
@@ -437,7 +422,7 @@ class IikoOborot {
             }
             $n++;
 
-            if (self::$show_html === true) {
+            if ( self::$show_html === true ) {
 
                 echo '<tr>';
 
@@ -473,111 +458,33 @@ class IikoOborot {
                 echo '</tr>';
             }
 
-            //\f\pa($e);
-
             if ($e['sum'] < 0) {
 
                 if (isset($e['type']) && ( trim($e['type']) == 'CASH' || trim($e['type']) == 'CARD' )) {
 
-                    if (self::$show_html === true)
+                    if ( self::$show_html === true )
                         \f\pa($e);
 
                     $sum2 += $e['sum'];
                 }
+
             }
+
         }
 
-        if (self::$show_html === true)
+        if ( self::$show_html === true )
             echo '</table>';
 
-        if ($sum == 0) {
+        if( $sum == 0 ){
             throw new \Exception('не получилось получить сумму оборота за сутки');
         }
-
+        
         return \f\end3('получили данные по обороту точки', true, array(
             'oborot' => (int) ( $sum + $sum2 ),
-            'skidki' => (int) $skidki,
             'plus' => (int) $sum,
             'minus' => (int) $sum2
         ));
-    }
 
-    /**
-     * вычисляем оборот за месяц
-     * @param type $db
-     * @param int $sp
-     * @param string $mont
-     * @return type
-     */
-    public static function whatMonthOborot($db, int $sp, string $month, $year = 2019) {
-
-        if (isset(self::$cash[$sp][$year][$month]))
-            return self::$cash[$sp][$year][$month];
-
-        $a = \Nyos\mod\items::getItemsSimple($db, 'sale_point_oborot');
-        // \f\pa($a);
-        //die();
-
-        $s_date = $year . '-' . $month . '-01';
-        $f_date = date('Y-m-d', strtotime($s_date . ' +1 month -1 day'));
-
-        // echo $s_date . ' - ' . $f_date;
-
-        $d = [];
-
-        foreach ($a['data'] as $k => $v) {
-
-            //if( $v['dop']['date'] == $d && $v['dop']['sale_point'] == $sp )
-            if (!empty($v['dop']['oborot_server']) && isset($v['dop']['sale_point']) && $v['dop']['sale_point'] == $sp)
-                $d[$v['dop']['date']] = $v['dop']['oborot_server'];
-        }
-
-        // usort($d, "\\f\\sort_ar_date");
-        // \f\pa($d);
-
-        $summ = 0;
-
-        $res = true;
-
-        for ($i = 0; $i <= 50; $i++) {
-
-            $d3 = date('Y-m-d', strtotime($s_date) + (3600 * 24 * $i));
-            // echo ' +'.$d3;
-
-            if ($f_date < $d3)
-                break;
-
-            // \f\pa($d[$d3]);
-            //echo $d3.' ';
-
-            if (isset($d[$d3])) {
-                $summ += $d[$d3];
-            } else {
-                $res = false;
-            }
-        }
-
-        return self::$cash[$sp][$year][$month] = \f\end3('ok', $res, array('oborot' => $summ));
-    }
-
-    /**
-     * получаем оборот по точке за день
-     * @param type $db
-     * @param int $sp
-     * @param string $date
-     * @return boolean
-     */
-    public static function getDayOborot($db, int $sp, string $date) {
-
-        $date = date('Y-m-d', strtotime($date));
-        
-        $a = \Nyos\mod\items::getItemsSimple($db, 'sale_point_oborot');
-
-        foreach ($a['data'] as $k => $v) {
-            if (!empty($v['dop']['oborot_server']) && isset($v['dop']['sale_point']) && $v['dop']['sale_point'] == $sp && isset($v['dop']['date']) && $v['dop']['date'] == $date)
-                return $v['dop']['oborot_server'];
-        }
-        return false;
     }
 
 }
