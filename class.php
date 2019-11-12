@@ -35,13 +35,11 @@ class IikoOborot {
     public static $db_base = '';
     public static $db_login = '';
     public static $db_pass = '';
-    
     public static $db_connect = null;
-    
     public static $show_html = false;
 
     public static function connectDb() {
-        
+
         $dops = array(
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
@@ -59,14 +57,87 @@ class IikoOborot {
         );
 
         self::$db_connect = $db7;
+    }
 
+    /**
+     * получаем цифру оборота за день
+     * @param type $db
+     * @param type $sp
+     * @param type $date
+     * @return boolean
+     * @throws \Exception
+     */
+    public static function getDayOborot($db, $sp, $date) {
+
+        if ($date >= date('Y-m-d', $_SERVER['REQUEST_TIME']))
+            return false;
+
+        $oborots = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_oborots);
+        // \f\pa($oborots);
+
+        foreach ($oborots['data'] as $k => $v) {
+
+            if (isset($v['dop']['sale_point']) && $v['dop']['sale_point'] == $sp && isset($v['dop']['date']) && $v['dop']['date'] == $date) {
+                if (isset($v['dop']['oborot_server'])) {
+                    return $v['dop']['oborot_server'];
+                }
+            }
+        }
+
+        $sps = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_sale_point);
+
+        if (isset($sps['data'][$sp]) && !empty($sps['data'][$sp]['dop']['id_tech_for_oborot'])) {
+
+
+// получаем данные для конекта к удалённой бд
+
+            foreach (\Nyos\Nyos::$menu as $k => $v) {
+                if ($v['type'] == 'iiko_checks' && $v['version'] == 1) {
+
+                    \Nyos\mod\IikoOborot::$db_type = $v['db_type'];
+                    \Nyos\mod\IikoOborot::$db_host = $v['db_host'];
+                    \Nyos\mod\IikoOborot::$db_port = $v['db_port'];
+                    \Nyos\mod\IikoOborot::$db_base = $v['db_base'];
+                    \Nyos\mod\IikoOborot::$db_login = $v['db_login'];
+                    \Nyos\mod\IikoOborot::$db_pass = $v['db_pass'];
+
+                    $e_cfg = true;
+
+                    break;
+                }
+            }
+
+
+            if (!isset($e_cfg)) {
+                throw new \Exception('не найдены данные для коннекта', 202);
+            }
+
+//            echo __LINE__ . ' ---------- ';
+//            \f\pa($sps['data'][$sp]);
+            // $o = self::connectDb();
+            $oborot = self::loadOborotFromServer($sps['data'][$sp]['dop']['id_tech_for_oborot'], $date);
+            // \f\pa($oborot);
+            // \f\pa($oborot['data']['oborot']);
+            if (isset($oborot['data']['oborot']) && is_numeric($oborot['data']['oborot'])) {
+
+                \Nyos\mod\items::addNewSimple($db, \Nyos\mod\JobDesc::$mod_oborots, [
+                    'sale_point' => $sp,
+                    'date' => $date,
+                    'oborot_server' => $oborot['data']['oborot']
+                ]);
+
+                return $oborot['data']['oborot'];
+            } else {
+                return false;
+            }
+        }
     }
 
     public static function loadOborotFromServer($sp_key, $date) {
 
-        if( empty(self::$db_connect) )
-        self::connectDb();
-        
+        if (empty(self::$db_connect))
+            self::connectDb();
+
         $sql = 'SELECT '
                 . ' dbo.OrderPaymentEvent.date '
                 . ' , '
@@ -199,14 +270,14 @@ class IikoOborot {
                 . ' ORDER BY prechequeTime ASC '
         ;
 
-        if ( self::$show_html === true )
+        if (self::$show_html === true)
             echo '<pre>' . $sql . '</pre>';
 
         $ff = self::$db_connect->prepare($sql);
 
         $ff->execute();
 
-        if ( self::$show_html === true )
+        if (self::$show_html === true)
             echo '<table cellpadding=10 border=1 >'; // <tr><td>1</td><td>2</td></tr>';
 
         $sum = 0;
@@ -215,7 +286,7 @@ class IikoOborot {
 
         while ($e = $ff->fetch()) {
 
-            if ( self::$show_html === true ) {
+            if (self::$show_html === true) {
                 if ($n == 1) {
                     echo '<tr>';
 
@@ -233,19 +304,19 @@ class IikoOborot {
                 $ar2 = $e;
             }
 
-            if ( self::$show_html === true )
+            if (self::$show_html === true)
                 echo '<tr>';
 
             foreach ($e as $k => $v) {
 
-                if ( self::$show_html === true )
+                if (self::$show_html === true)
                     echo '<td>' . iconv('windows-1251', 'utf-8', $v) . '</td>';
 
                 if ($k == 'sumCard' || $k == 'sumCash')
                     $sum += $v;
             }
 
-            if ( self::$show_html === true )
+            if (self::$show_html === true)
                 echo '</tr>';
 
 //$e['user'] = mb_convert_encoding($e['user'],'UTF-8','auto');
@@ -258,11 +329,10 @@ class IikoOborot {
         }
 //    \f\pa($e3);
 
-        if ( self::$show_html === true ) {
+        if (self::$show_html === true) {
+
             echo '</table>';
-
             echo '<p>Сумма ' . $sum . '</p>';
-
             \f\pa($ar2, 2, '', '$ar2');
         }
 
@@ -394,13 +464,13 @@ class IikoOborot {
 // .' AND created < \'' . date('Y-m-d 12:00:00', strtotime($date) + 3600 * 24) . '\' '
         ;
 
-        if ( self::$show_html === true )
+        if (self::$show_html === true)
             echo '<pre>' . $sql . '</pre>';
 
         $ff = self::$db_connect->prepare($sql);
         $ff->execute();
 
-        if ( self::$show_html === true )
+        if (self::$show_html === true)
             echo '<table cellpadding=10 border=1 >'; // <tr><td>1</td><td>2</td></tr>';
 
         $sum2 = 0;
@@ -409,7 +479,7 @@ class IikoOborot {
 
         while ($e = $ff->fetch()) {
 
-            if ( self::$show_html === true ) {
+            if (self::$show_html === true) {
                 if ($n == 1) {
                     echo '<tr>';
 
@@ -422,7 +492,7 @@ class IikoOborot {
             }
             $n++;
 
-            if ( self::$show_html === true ) {
+            if (self::$show_html === true) {
 
                 echo '<tr>';
 
@@ -430,6 +500,7 @@ class IikoOborot {
 
 // 1173
                     if (isset($v{2})) {
+
                         echo '<td>';
 //                    echo '<nobr>' ;
 //                    foreach($ar2 as $kk => $vv ){
@@ -442,6 +513,7 @@ class IikoOborot {
 //echo '//'.iconv('windows-1251', 'utf-8', $v) . '//</td>';
                         echo iconv('windows-1251', 'utf-8', $v) . '</td>';
                     } else {
+
                         echo '<td>';
 //                    echo '<nobr>' ;
 //                    foreach($ar2 as $kk => $vv ){
@@ -455,6 +527,7 @@ class IikoOborot {
                         echo $v . '</td>';
                     }
                 }
+
                 echo '</tr>';
             }
 
@@ -462,29 +535,26 @@ class IikoOborot {
 
                 if (isset($e['type']) && ( trim($e['type']) == 'CASH' || trim($e['type']) == 'CARD' )) {
 
-                    if ( self::$show_html === true )
+                    if (self::$show_html === true)
                         \f\pa($e);
 
                     $sum2 += $e['sum'];
                 }
-
             }
-
         }
 
-        if ( self::$show_html === true )
+        if (self::$show_html === true)
             echo '</table>';
 
-        if( $sum == 0 ){
+        if ($sum == 0) {
             throw new \Exception('не получилось получить сумму оборота за сутки');
         }
-        
+
         return \f\end3('получили данные по обороту точки', true, array(
             'oborot' => (int) ( $sum + $sum2 ),
             'plus' => (int) $sum,
             'minus' => (int) $sum2
         ));
-
     }
 
 }

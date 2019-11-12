@@ -263,7 +263,7 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
         \Nyos\mod\IikoOborot::$show_html = false;
         $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp_id, $date);
 
-        \f\pa($ret);
+        // \f\pa($ret);
         // echo '<br/>' . __FILE__ . ' ' . __LINE__;
 
         \Nyos\mod\items::addNewSimple($db, 'sale_point_oborot', array(
