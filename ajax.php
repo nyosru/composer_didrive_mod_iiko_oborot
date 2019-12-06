@@ -62,46 +62,49 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 
     //echo __FILE__ . ' ' . __LINE__;
 
-    \Nyos\mod\items::$sql_itemsdop2_add_where = '
-        INNER JOIN `mitems-dops` md1 
-            ON 
-                md1.id_item = mi.id 
-                AND md1.name = \'id_tech_for_oborot\'
-                AND md1.value IS NOT NULL 
-        ';
+//    \Nyos\mod\items::$sql_itemsdop2_add_where = '
+//        INNER JOIN `mitems-dops` md1 
+//            ON 
+//                md1.id_item = mi.id 
+//                AND md1.name = \'id_tech_for_oborot\'
+//                AND md1.value IS NOT NULL 
+//        ';
     $sp = \Nyos\mod\items::getItemsSimple($db, 'sale_point');
     //\f\pa($sp);
 
-
-
     $sp_for = [];
     foreach ($sp['data'] as $k => $v) {
+        if( isset($v['dop']['id_tech_for_oborot']) ){
         $sp_for[$v['id']] = $v['dop']['id_tech_for_oborot'];
         $sp_head[$v['id']] = $v['head'];
+        }
     }
     // \f\pa($sp_for, 2, '', '\f\pa($sp_for);');
-
+    // die(__LINE__);
 
     /**
      * тащим инфу что уже есть на сайте
      */
-    \Nyos\mod\items::$sql_itemsdop_add_where_array = array(
-        ':dt' => date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4)
-    );
-    \Nyos\mod\items::$sql_itemsdop2_add_where = '
-        INNER JOIN `mitems-dops` md1 
-            ON 
-                md1.id_item = mi.id 
-                AND md1.name = \'date\'
-                AND md1.value_date >= :dt
-        ';
+//    \Nyos\mod\items::$sql_itemsdop_add_where_array = array(
+//        ':dt' => date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4)
+//    );
+$dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4);
+//    \Nyos\mod\items::$sql_itemsdop2_add_where = '
+//        INNER JOIN `mitems-dops` md1 
+//            ON 
+//                md1.id_item = mi.id 
+//                AND md1.name = \'date\'
+//                AND md1.value_date >= :dt
+//        ';
     //\Nyos\mod\items::$show_sql = true ;
     $now_oborot = \Nyos\mod\items::getItemsSimple($db, 'sale_point_oborot');
     // \f\pa($now_oborot, 2, '', 'текущиий оборот за прошедшие даты по точкам');
 
     $est_dt = [];
     foreach ($now_oborot['data'] as $k => $v) {
+        if( isset($v['dop']['date']) && $v['dop']['date'] >= $dt ){
         $est_dt[$v['dop']['sale_point']][$v['dop']['date']] = 1;
+        }
     }
 
     //\f\pa($est_dt, 2, '', 'текущие обороты дата - точка');
@@ -784,7 +787,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_list654') {
  * загрузка данных по 1 работнику с даты по дату 
  * (из боди ссылка в списке учёта времени)
  */
-if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'load_checks_for_1jobman') {
+if ( 1 == 2 && isset($_REQUEST['action']) && $_REQUEST['action'] == 'load_checks_for_1jobman') {
 
     if (isset($_REQUEST['show_timer']))
         \f\timer::start();

@@ -15,8 +15,6 @@ if (!defined('IN_NYOS_PROJECT'))
 class IikoOborot {
 
     public static $cash = [];
-    
-    
 //foreach (\Nyos\Nyos::$menu as $k => $v) {
 //    if ($v['type'] == 'iiko_checks' && $v['version'] == 1) {
 //
@@ -612,43 +610,83 @@ class IikoOborot {
      */
     public static function getOborotMonth($db, int $sp, $date, $mod_oborot = 'sale_point_oborot') {
 
-        $date_start = date( 'Y-m-01', strtotime($date) );
-        
-        if( !empty(self::$cash[$sp][$date_start]) )
-        return self::$cash[$sp][$date_start];
-        
-        $date_finish = date( 'Y-m-d', strtotime($date_start.' +1 month -1 day') );
+        $date_start = date('Y-m-01', strtotime($date));
 
-        $oborots = \Nyos\mod\items::getItemsSimple($db, $mod_oborot);
+        if (!empty(self::$cash[$sp][$date_start]))
+            return self::$cash[$sp][$date_start];
+
+        $date_finish = date('Y-m-d', strtotime($date_start . ' +1 month -1 day'));
+
+        if (1 == 1) {
+
+            \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` md ON '
+                    . ' `md`.`id_item` = mi.id '
+                    . 'AND `md`.`name` = \'date\' '
+                    . 'AND `md`.`value_date` >= \'' . $date_start . '\'  '
+                    . 'AND `md`.`value_date` <= \'' . $date_finish . '\'  '
+                    . ' INNER JOIN `mitems-dops` md2 ON '
+                    . ' `md2`.`id_item` = mi.id '
+                    . 'AND `md2`.`name` = \'sale_point\' '
+                    . 'AND `md2`.`value` = \'' . $sp . '\' ';
+            $oborots = \Nyos\mod\items::getItemsSimple3($db, $mod_oborot);
 //    echo '<pre>';
 //    \f\pa($oborots,2);
 //    echo '</pre>';
+            // $re = ['summa' => 0];
+            self::$cash[$sp][$date_start] = 0;
 
-        // $re = ['summa' => 0];
-        self::$cash[$sp][$date_start] = 0;
+            foreach ($oborots as $k => $v) {
+                if (
+                        isset($v['sale_point']) &&
+                        $v['sale_point'] == $sp &&
+                        isset($v['date']) &&
+                        $v['date'] >= $date_start &&
+                        $v['date'] <= $date_finish
+                ) {
 
-        foreach ($oborots['data'] as $k => $v) {
-            if (
-                    isset($v['dop']['sale_point']) &&
-                    $v['dop']['sale_point'] == $sp &&
-                    isset($v['dop']['date']) &&
-                    $v['dop']['date'] >= $date_start &&
-                    $v['dop']['date'] <= $date_finish
-            ) {
+                    // $re[$v['dop']['date']] = $v['dop'];
+                    // $re[$v['dop']['date']] = $v['dop']['oborot_server'];
+                    // $re[$v['dop']['date']]['id'] = $v['id'];
 
-                // $re[$v['dop']['date']] = $v['dop'];
-                // $re[$v['dop']['date']] = $v['dop']['oborot_server'];
-                // $re[$v['dop']['date']]['id'] = $v['id'];
-
-                self::$cash[$sp][$date_start] += $v['dop']['oborot_server'];
+                    self::$cash[$sp][$date_start] += $v['oborot_server'];
+                } else {
+                    echo '<br/>' . __LINE__;
+                }
             }
-        }
+            
+        } else {
+
+            $oborots = \Nyos\mod\items::getItemsSimple($db, $mod_oborot);
+//    echo '<pre>';
+//    \f\pa($oborots,2);
+//    echo '</pre>';
+            // $re = ['summa' => 0];
+            self::$cash[$sp][$date_start] = 0;
+
+            foreach ($oborots['data'] as $k => $v) {
+                if (
+                        isset($v['dop']['sale_point']) &&
+                        $v['dop']['sale_point'] == $sp &&
+                        isset($v['dop']['date']) &&
+                        $v['dop']['date'] >= $date_start &&
+                        $v['dop']['date'] <= $date_finish
+                ) {
+
+                    // $re[$v['dop']['date']] = $v['dop'];
+                    // $re[$v['dop']['date']] = $v['dop']['oborot_server'];
+                    // $re[$v['dop']['date']]['id'] = $v['id'];
+
+                    self::$cash[$sp][$date_start] += $v['dop']['oborot_server'];
+                }
+            }
 
 //    foreach ($oborots['data'] as $k => $v) {
 //        if (isset($v['dop'])) {
 //            
 //        }
 //    }
+        }
+
 
         return self::$cash[$sp][$date_start];
 
@@ -679,17 +717,17 @@ class IikoOborot {
         if ($date >= date('Y-m-d', $_SERVER['REQUEST_TIME']))
             return false;
 
-        $oborots = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_oborots);
+        // $oborots = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_oborots);
+        $oborots = \Nyos\mod\items::getItemsSimple3($db, \Nyos\mod\JobDesc::$mod_oborots);
         // \f\pa($oborots);
 
-        foreach ($oborots['data'] as $k => $v) {
-
-            if (isset($v['dop']['sale_point']) && $v['dop']['sale_point'] == $sp && isset($v['dop']['date']) && $v['dop']['date'] == $date) {
-                if (isset($v['dop']['oborot_server'])) {
-                    return $v['dop']['oborot_server'];
-                }
+        foreach ($oborots as $k => $v) {
+            if (isset($v['sale_point']) && $v['sale_point'] == $sp && isset($v['date']) && $v['date'] == $date && isset($v['oborot_server'])) {
+                return $v['oborot_server'];
             }
         }
+
+        return false;
 
         $sps = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_sale_point);
 
