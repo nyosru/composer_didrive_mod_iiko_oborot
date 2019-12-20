@@ -247,7 +247,7 @@ class IikoOborot {
                     . ' ORDER BY prechequeTime ASC '
             ;
 
-            if (isset($_REQUEST['show']))
+            if (isset($_REQUEST['show_sql']))
                 echo '<pre>' . $sql . '</pre>';
 
             $ff = $db7->prepare($sql);
@@ -299,8 +299,13 @@ class IikoOborot {
 
                 foreach ($e as $k => $v) {
 
-                    if (isset($_REQUEST['show']))
-                        echo '<td>' . iconv('windows-1251', 'utf-8', $v) . '</td>';
+                    if (isset($_REQUEST['show'])) {
+                        echo '<td>';
+                        if (!empty($v)) {
+                            echo @iconv('windows-1251', 'utf-8', $v);
+                        }
+                        echo '</td>';
+                    }
 
                     if ($k == 'sumCard' || $k == 'sumCash')
                         $sum += $v;
@@ -324,6 +329,7 @@ class IikoOborot {
 
                 echo '<p>Сумма ' . $sum . '</p>';
 
+            if ( isset($_REQUEST['show_ar']))
                 \f\pa($ar2, 2, '', '$ar2');
             }
 
@@ -469,7 +475,7 @@ class IikoOborot {
             // .' AND created < \'' . date('Y-m-d 12:00:00', strtotime($date) + 3600 * 24) . '\' '
             ;
 
-            if (isset($_REQUEST['show']))
+            if (isset($_REQUEST['show_sql']))
                 echo '<pre>' . $sql . '</pre>';
 
             $ff = $db7->prepare($sql);
@@ -558,8 +564,11 @@ class IikoOborot {
                     //if ( isset( $e['sum'] )  && $e['sum'] < 0 && isset( $e['type'] )  && ( $e['type'] == 'CASH' || $e['type'] == 'CARD' ) )
                     if (isset($e['type']) && ( trim($e['type']) == 'CASH' || trim($e['type']) == 'CARD' )) {
 
-                        if (isset($_REQUEST['show']))
-                            \f\pa($e);
+//                        if (isset($_REQUEST['show']))
+//                            \f\pa($e);
+
+                        if (isset($_REQUEST['ajax_calculate']))
+                            echo '<br/>minus ' . $e['sum'] . ' руб ' . $e['date'] . ' ' . $e['type'];
 
                         $sum2 += $e['sum'];
                     }
@@ -581,8 +590,13 @@ class IikoOborot {
                 echo '</table>';
 
             if (isset($_REQUEST['show'])) {
-                echo '<p>Сумма- : ' . (int) $sum2 . '</p>';
-                echo '<p>Итого- : ' . (int) ( $sum + $sum2 ) . '</p>';
+                echo '<p>'
+                . 'Сумма плюс : ' . (int) $sum
+                . '<br/>'
+                . 'Сумма минус : ' . (int) $sum2
+                . '<br/>'
+                . 'Итого : ' . (int) ( $sum + $sum2 )
+                . '</p>';
                 exit;
             } else {
 //                die(\f\end2('получили данные по обороту точки', true, array(
@@ -653,7 +667,6 @@ class IikoOborot {
                     echo '<br/>' . __LINE__;
                 }
             }
-            
         } else {
 
             $oborots = \Nyos\mod\items::getItemsSimple($db, $mod_oborot);
