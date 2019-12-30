@@ -965,12 +965,12 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
         /**
          * пишем дату крайней загрузки
          */
-        $ff = $db->prepare('DELETE FROM mitems WHERE module = :id AND head = :sp ');
-        $ff->execute(array(
-            ':id' => $mod_list_time_lastload,
-            ':sp' => $sp_id
-        ));
-        \Nyos\mod\items::addNewSimple($db, $mod_list_time_lastload, array('head' => $sp_id));
+//        $ff = $db->prepare('DELETE FROM mitems WHERE module = :id AND head = :sp ');
+//        $ff->execute(array(
+//            ':id' => $mod_list_time_lastload,
+//            ':sp' => $sp_id
+//        ));
+//        \Nyos\mod\items::addNewSimple($db, $mod_list_time_lastload, array('head' => $sp_id));
 
 
 

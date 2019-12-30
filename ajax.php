@@ -3,10 +3,7 @@
 // ini_set('display_errors', 'On'); // сообщения с ошибками будут показываться
 // error_reporting(E_ALL); // E_ALL - отображаем ВСЕ ошибки
 
-if ($_SERVER['HTTP_HOST'] == 'photo.uralweb.info' 
-        || $_SERVER['HTTP_HOST'] == 'yapdomik.uralweb.info' 
-        || $_SERVER['HTTP_HOST'] == 'a2.uralweb.info' 
-        || $_SERVER['HTTP_HOST'] == 'adomik.uralweb.info'
+if ($_SERVER['HTTP_HOST'] == 'photo.uralweb.info' || $_SERVER['HTTP_HOST'] == 'yapdomik.uralweb.info' || $_SERVER['HTTP_HOST'] == 'a2.uralweb.info' || $_SERVER['HTTP_HOST'] == 'adomik.uralweb.info'
 ) {
     date_default_timezone_set("Asia/Omsk");
 } else {
@@ -65,11 +62,11 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server
 
     \Nyos\mod\IikoOborot::loadOborotFromServer($_REQUEST['sp_key'], date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24));
 }
+
 // получаем со всех точек обороты за последние 4 дня, перезаписываем значения если нет значения
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server_last_days') {
 
     //echo __FILE__ . ' ' . __LINE__;
-
 //    \Nyos\mod\items::$sql_itemsdop2_add_where = '
 //        INNER JOIN `mitems-dops` md1 
 //            ON 
@@ -82,9 +79,9 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 
     $sp_for = [];
     foreach ($sp['data'] as $k => $v) {
-        if( isset($v['dop']['id_tech_for_oborot']) ){
-        $sp_for[$v['id']] = $v['dop']['id_tech_for_oborot'];
-        $sp_head[$v['id']] = $v['head'];
+        if (isset($v['dop']['id_tech_for_oborot'])) {
+            $sp_for[$v['id']] = $v['dop']['id_tech_for_oborot'];
+            $sp_head[$v['id']] = $v['head'];
         }
     }
     // \f\pa($sp_for, 2, '', '\f\pa($sp_for);');
@@ -96,7 +93,7 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 //    \Nyos\mod\items::$sql_itemsdop_add_where_array = array(
 //        ':dt' => date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4)
 //    );
-$dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4);
+    $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4);
 //    \Nyos\mod\items::$sql_itemsdop2_add_where = '
 //        INNER JOIN `mitems-dops` md1 
 //            ON 
@@ -110,8 +107,8 @@ $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4);
 
     $est_dt = [];
     foreach ($now_oborot['data'] as $k => $v) {
-        if( isset($v['dop']['date']) && $v['dop']['date'] >= $dt ){
-        $est_dt[$v['dop']['sale_point']][$v['dop']['date']] = 1;
+        if (isset($v['dop']['date']) && $v['dop']['date'] >= $dt) {
+            $est_dt[$v['dop']['sale_point']][$v['dop']['date']] = 1;
         }
     }
 
@@ -158,7 +155,7 @@ $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4);
 //    echo '<br/>';
 
 
-    if ( 1 == 1 && !empty($indb) && class_exists('\\Nyos\\Msg')) {
+    if (1 == 1 && !empty($indb) && class_exists('\\Nyos\\Msg')) {
 
         if (!isset($vv['admin_ajax_job'])) {
             require_once DR . '/sites/' . \Nyos\nyos::$folder_now . '/config.php';
@@ -166,15 +163,261 @@ $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4);
 
         \nyos\Msg::sendTelegramm($txt, null, 1);
 
-                if (isset($vv['admin_ajax_job'])) {
-                    foreach ($vv['admin_ajax_job'] as $k => $v) {
-                        \Nyos\Msg::sendTelegramm($txt, $v);
-                    }
-                }
+        if (isset($vv['admin_ajax_job'])) {
+            foreach ($vv['admin_ajax_job'] as $k => $v) {
+                \Nyos\Msg::sendTelegramm($txt, $v);
+            }
+        }
     }
 
     die(\f\end2('ok', true, $indb));
 }
+
+// получаем id всех точек что есть на сервере, сразу соответствия проставляем с теми что записаны в локальной БД
+elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_all_id') {
+
+
+    $ar = [];
+
+    $handle = @fopen("id_oborots.csv", "r");
+    if ($handle) {
+
+//        $ww = 0;
+
+        while (($buffer = fgets($handle, 4096)) !== false) {
+
+//        $ww++;
+//        if( $ww >= 10 ){
+//            break;
+//        }
+
+
+            $ar[trim($buffer)] = 1;
+        }
+        if (!feof($handle)) {
+            echo "Ошибка: fgets() неожиданно потерпел неудачу\n";
+        }
+        fclose($handle);
+    }
+
+// \f\pa($ar);
+    foreach ($ar as $k => $v) {
+        echo '<br/>' . str_replace('"', '', $k);
+    }
+
+    exit;
+
+    $e = explode("
+", file_get_contents('id_oborots.csv'));
+    // \f\pa($e);
+    $ww = 0;
+    foreach ($e as $k) {
+
+        $ww++;
+        if ($ww >= 10) {
+            break;
+        }
+
+        echo '<br/>' . $k;
+    }
+    exit;
+
+
+
+
+    $sp = \Nyos\mod\items::getItemsSimple3($db, 'sale_point');
+    //\f\pa($sp);
+
+    $ar_key_sp = [];
+    foreach ($sp as $k => $v) {
+        if (isset($v['id_tech_for_oborot'])) {
+            $ar_key_sp[$v['id_tech_for_oborot']] = $v['head'];
+        }
+    }
+    // \f\pa($ar_key_sp, 2, '', '\f\pa($ar_key_sp);');
+    // die(__LINE__);
+
+    /**
+     * тащим инфу что уже есть на сайте
+     */
+//    $now_oborot = \Nyos\mod\items::getItemsSimple($db, 'sale_point_oborot');
+// \f\pa($now_oborot, 2, '', 'текущиий оборот за прошедшие даты по точкам');
+//    $est_dt = [];
+//    foreach ($now_oborot['data'] as $k => $v) {
+//        if (isset($v['dop']['date']) && $v['dop']['date'] >= $dt) {
+//            $est_dt[$v['dop']['sale_point']][$v['dop']['date']] = 1;
+//        }
+//    }
+    //\f\pa($est_dt, 2, '', 'текущие обороты дата - точка');
+
+    \Nyos\mod\IikoOborot::connectDb();
+    // \Nyos\mod\IikoOborot::$db_connect->exec('SET NAMES utf8');
+    // \Nyos\mod\IikoOborot::$db_connect->exec('SET NAMES \'utf8mb4\' COLLATE \'utf8mb4_unicode_ci\'');
+
+
+
+
+    $sql = 'SELECT '
+            . ' dbo.OrderPaymentEvent.date '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.prechequeTime , '
+            . ' dbo.OrderPaymentEvent.orderSum, '
+            . ' dbo.OrderPaymentEvent.sumCard, '
+            . ' dbo.OrderPaymentEvent.sumCash , '
+            . ' dbo.OrderPaymentEvent.unmodifiable , '
+            . ' dbo.OrderPaymentEvent.changeSum , '
+            . ' dbo.OrderPaymentEvent.receiptsSum , '
+            . ' dbo.OrderPaymentEvent.problemOpName '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.orderNum '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.revision '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.department '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.auth_card_slip '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.auth_user '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.closeTime '
+//            . ' , '
+//            . ' dbo.OrderPaymentEvent.discount '
+//            . ' , '
+//            . ' dbo.OrderPaymentEvent.increase '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.isBanquet '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.numGuests '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.openTime '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.[order] '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.orderNum '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.orderSum '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.orderSumAfterDiscount '
+//            . ' , '
+//            . ' dbo.OrderPaymentEvent.prechequeTime '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.priceCategory '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.problemOpName '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.problemPriority '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.problemType '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.receiptsSum '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.restaurantSection '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.session_group '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.session_id '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.session_number '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.storned '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.tableNum '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.[user] '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.waiter '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.cashRegister '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.cashier '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.changeSum '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.counteragent '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.detailedCheque '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.divisions '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.fiscalChequeNumber '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.isDelivery '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.nonCashPaymentType '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.orderType '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.pcCard '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.pcDiscountCard '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.pcUser '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.sumCard '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.sumCash '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.sumCredit '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.sumPlanned '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.sumPrepay '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.unmodifiable '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.writeoffPaymentType '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.writeoffRatio '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.writeoffReason '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.writeoffUser '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.orderDeleted '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.originName '
+            . ' , '
+            . ' dbo.OrderPaymentEvent.vatInvoiceId '
+            . '
+                FROM 
+                    dbo.OrderPaymentEvent
+                WHERE 
+                '
+            .
+            ' restaurantSection = \'' . $sp_key . '\' '
+            . ' AND date = \'' . date('Y-m-d', strtotime($date)) . '\' '
+            . ' ORDER BY prechequeTime ASC '
+    ;
+
+
+    $sql = 'SELECT 
+                    DISTINCT restaurantSection as ri
+                FROM 
+                    dbo.OrderPaymentEvent
+                ';
+
+    if (\Nyos\mod\IikoOborot::$show_html === true)
+        echo '<pre>' . $sql . '</pre>';
+
+    $ff = \Nyos\mod\IikoOborot::$db_connect->prepare($sql);
+
+    $ff->execute();
+
+    // \f\pa( $ff->fetchAll() );
+
+    while ($e = $ff->fetch()) {
+
+        $originalEncoding = mb_detect_encoding($e['ri']);
+        echo '<br/>' . $originalEncoding;
+
+        // \f\pa($e);
+        echo '<br/>+ ' . iconv('windows-1251', 'UTF-8', $e['ri']);
+    }
+
+    // die(\f\end2('ok', true, $indb));
+    die(\f\end2('ok', true));
+}
+
 
 die(\f\end2('Произошло что то не то', false));
 
@@ -795,7 +1038,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_list654') {
  * загрузка данных по 1 работнику с даты по дату 
  * (из боди ссылка в списке учёта времени)
  */
-if ( 1 == 2 && isset($_REQUEST['action']) && $_REQUEST['action'] == 'load_checks_for_1jobman') {
+if (1 == 2 && isset($_REQUEST['action']) && $_REQUEST['action'] == 'load_checks_for_1jobman') {
 
     if (isset($_REQUEST['show_timer']))
         \f\timer::start();
@@ -1521,8 +1764,7 @@ if (1 == 2) {
                         , 'ok', array('number_kupon' => $res['number_kupon'])
                 );
             }
-        }
-        else {
+        } else {
 
             //require_once($_SERVER['DOCUMENT_ROOT'] . '/0.all/f/smarty.php');
             //f\end2(f\compileSmarty('ajax_form_enter.htm', array(), dirname(__FILE__) . '/../../lk/3/tpl_smarty/')

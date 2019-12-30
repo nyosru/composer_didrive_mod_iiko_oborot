@@ -41,10 +41,34 @@ class IikoOborot {
 
     public static function connectDb() {
 
+        if (empty(self::$db_base) || empty(self::$db_host) || empty(self::$db_login) || empty(self::$db_pass)) {
+
+            foreach (\Nyos\Nyos::$menu as $k => $v) {
+                if ($v['type'] == 'iiko_checks' && $v['version'] == 1) {
+
+                    \Nyos\mod\IikoOborot::$db_type = $v['db_type'];
+                    \Nyos\api\Iiko::$db_type = $v['db_type'];
+                    \Nyos\mod\IikoOborot::$db_host = $v['db_host'];
+                    \Nyos\api\Iiko::$db_host = $v['db_host'];
+                    \Nyos\mod\IikoOborot::$db_port = $v['db_port'];
+                    \Nyos\api\Iiko::$db_port = $v['db_port'];
+                    \Nyos\mod\IikoOborot::$db_base = $v['db_base'];
+                    \Nyos\api\Iiko::$db_base = $v['db_base'];
+                    \Nyos\mod\IikoOborot::$db_login = $v['db_login'];
+                    \Nyos\api\Iiko::$db_login = $v['db_login'];
+                    \Nyos\mod\IikoOborot::$db_pass = $v['db_pass'];
+                    \Nyos\api\Iiko::$db_pass = $v['db_pass'];
+
+                    break;
+                }
+            }
+        }
+
         $dops = array(
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 //                \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8'
+//            \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci' "
         );
 
         $db7 = new \PDO(
@@ -52,6 +76,8 @@ class IikoOborot {
                 . ':dbname=' . ( self::$db_base ?? '' )
                 . ';host=' . ( self::$db_host ?? '' )
                 . ( isset(self::$db_port{1}) ? ';port=' . self::$db_port : '' )
+                // . ';charset=utf8mb4'
+                // . ';charset=windows-1251'
                 , ( isset(self::$db_login{1}) ? self::$db_login : '')
                 , ( isset(self::$db_pass{1}) ? self::$db_pass : '')
                 , $dops
@@ -329,8 +355,8 @@ class IikoOborot {
 
                 echo '<p>Сумма ' . $sum . '</p>';
 
-            if ( isset($_REQUEST['show_ar']))
-                \f\pa($ar2, 2, '', '$ar2');
+                if (isset($_REQUEST['show_ar']))
+                    \f\pa($ar2, 2, '', '$ar2');
             }
 
             if (empty($ar2))
@@ -730,16 +756,39 @@ class IikoOborot {
         if ($date >= date('Y-m-d', $_SERVER['REQUEST_TIME']))
             return false;
 
-        // $oborots = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_oborots);
-        $oborots = \Nyos\mod\items::getItemsSimple3($db, \Nyos\mod\JobDesc::$mod_oborots);
-        // \f\pa($oborots);
+//        // $oborots = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_oborots);
+//        // $oborots = \Nyos\mod\items::getItemsSimple3($db, \Nyos\mod\JobDesc::$mod_oborots);
+//        \Nyos\mod\items::$join_where = 
+//                ' INNER JOIN `mitems-dops` mid ON mid.id_item = mi.id '
+//                . ' AND mid.name = \'date\' AND mid.value_date = \'' . $date . '\' ' 
+//                . ' INNER JOIN `mitems-dops` mid2 ON mid2.id_item = mi.id '
+//                . ' AND mid2.name = \'sale_point\' AND mid2.value = \'' . $sp . '\' ' 
+//                ;
+//        $oborots = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
+//        \f\pa($oborots,'','','oborots');
+//
+//        foreach ($oborots as $k => $v) {
+//            if (isset($v['sale_point']) && $v['sale_point'] == $sp && isset($v['date']) && $v['date'] == $date && isset($v['oborot_server'])) {
+//                return $v['oborot_server'];
+//            }
+//        }
 
-        foreach ($oborots as $k => $v) {
-            if (isset($v['sale_point']) && $v['sale_point'] == $sp && isset($v['date']) && $v['date'] == $date && isset($v['oborot_server'])) {
+        \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid ON mid.id_item = mi.id '
+                . ' AND mid.name = \'date\' AND mid.value_date = \'' . $date . '\' '
+                . ' INNER JOIN `mitems-dops` mid2 ON mid2.id_item = mi.id '
+                . ' AND mid2.name = \'sale_point\' AND mid2.value = \'' . $sp . '\' '
+        ;
+        $oborots = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
+        // \f\pa($oborots, '', '', 'oborots');
+
+        if (!empty($oborots))
+            foreach ($oborots as $k => $v) {
                 return $v['oborot_server'];
             }
-        }
 
+        /**
+         * если нет оборота в данных локальной БД то тащим с удалённой
+         */
         return false;
 
         $sps = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_sale_point);
@@ -789,6 +838,42 @@ class IikoOborot {
                 return false;
             }
         }
+    }
+
+    public static function loadFromServerSaveItems($db, $sp, $date, $mod_sp = 'sale_point', $mod_sp_oborot = 'sale_point_oborot') {
+
+        $date = date('Y-m-d', strtotime($_REQUEST['date']));
+
+        \Nyos\mod\items::$where2 = ' AND `id` = \'' . (int) $sp . '\' ';
+        \Nyos\mod\items::$limit1 = true;
+        \Nyos\mod\items::$where2dop = ' AND `name` = \'id_tech_for_oborot\' ';
+        
+        $sp1 = \Nyos\mod\items::get($db, $mod_sp);
+        // \f\pa($sp1);
+
+        // $sp_id = $get_sp_d ?? $time_sp_key ?? $_REQUEST['key_iiko_from_sp'] ?? $_REQUEST['sp_key_iiko'] ?? false;
+        // \f\pa($sp_id);
+        // echo '<br/>'.__FILE__.' '.__LINE__;
+
+        if (empty($sp1['id_tech_for_oborot']))
+            throw new \Exception('У точки продаж не определён id для подгрузки оборотов', 211);
+
+        \Nyos\mod\IikoOborot::$show_html = false;
+        $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp1['id_tech_for_oborot'], $date);
+
+        // \f\pa($ret, '', '', 'oborot from server');
+
+        // echo '<br/>' . __FILE__ . ' ' . __LINE__;
+
+        \Nyos\mod\items::addNewSimple($db, $mod_sp_oborot, [
+            'date' => $date,
+            'sale_point' => $sp,
+            'oborot_server' => $ret['data']['oborot']
+                ]
+        );
+        
+        return $ret['data']['oborot'];
+        
     }
 
     public static function loadOborotFromServer($sp_key, $date) {
