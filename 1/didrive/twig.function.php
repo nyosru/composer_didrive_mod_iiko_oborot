@@ -3,32 +3,8 @@
 /**
   определение функций для TWIG
  */
-//creatSecret
-//echo __FILE__.' '.__LINE__;
 
 $function = new Twig_SimpleFunction('iiko_oborot__get_oborots_on_sp', function ( $db, string $sp, string $date_start, string $date_finish ) {
-
-//    \Nyos\mod\items::$sql_itemsdop_add_where_array = array(
-//        ':sp' => $sp
-//    );
-//    \Nyos\mod\items::$sql_itemsdop2_add_where = '
-//        INNER JOIN `mitems-dops` md1 
-//            ON 
-//                md1.id_item = mi.id 
-//                AND md1.name = \'sale_point\'
-//                AND md1.value = :sp
-//        ';    
-//    $oborots = \Nyos\mod\items::getItemsSimple($db, 'sale_point_oborot');
-//    \Nyos\mod\items::$sql_itemsdop_add_where_array = array(
-//        ':sp' => $sp
-//    );
-//    \Nyos\mod\items::$sql_itemsdop2_add_where = '
-//        INNER JOIN `mitems-dops` md1 
-//            ON 
-//                md1.id_item = mi.id 
-//                AND md1.name = \'sale_point\'
-//                AND md1.value = :sp
-//        ';
 
     \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid '
             . ' ON mid.id_item = mi.id '
@@ -44,35 +20,17 @@ $function = new Twig_SimpleFunction('iiko_oborot__get_oborots_on_sp', function (
     \Nyos\mod\items::$var_ar_for_1sql[':sp'] = $sp;
     \Nyos\mod\items::$var_ar_for_1sql[':ds'] = $date_start;
     \Nyos\mod\items::$var_ar_for_1sql[':df'] = $date_finish;
+    
+    // \Nyos\mod\items::$where2dop = ' AND ( name ';
+    
     $oborots = \Nyos\mod\items::get($db, 'sale_point_oborot');
-
-//    echo '<pre>';
-//    \f\pa($oborots,2);
-//    echo '</pre>';
 
     $re = ['summa' => 0];
 
     foreach ($oborots as $k => $v) {
-//        if (
-//                isset($v['sale_point']) &&
-//                $v['sale_point'] == $sp &&
-//                isset($v['date']) &&
-//                $v['date'] >= $date_start &&
-//                $v['date'] <= $date_finish
-//        ) {
-
         $re[$v['date']] = $v;
-        //$re[$v['date']]['id'] = $v['id'];
-
-        $re['summa'] += $v['oborot_server'];
-//        }
+        $re['summa'] += !empty($v['oborot_hand']) ? $v['oborot_hand'] : $v['oborot_server'];
     }
-
-//    foreach ($oborots['data'] as $k => $v) {
-//        if (isset($v['dop'])) {
-//            
-//        }
-//    }
 
     return $re;
 });
