@@ -25,9 +25,8 @@ if (isset($_GET['show_get']) && $_GET['show_get'] = 'da') {
 
 if (
         ( isset($_REQUEST['action']{0}) &&
-        ( 
-                $_REQUEST['action'] == 'get_oborot_for_sps' 
-                || $_REQUEST['action'] == 'get_sps_id'
+        (
+        $_REQUEST['action'] == 'get_oborot_for_sps' || $_REQUEST['action'] == 'get_sps_id'
         )
         ) ||
 //        ( isset($_REQUEST['act2']{0}) && $_REQUEST['act2'] == 'read48_and_refresh_all' ) ||
@@ -779,7 +778,7 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
     }
 
     die();
-} 
+}
 
 //
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_for_sps') {
@@ -790,7 +789,6 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_for_sps
 //                    $ar_in_sql[':date_end'] = date( 'Y-m-d 23:59:00', strtotime($date_fin) );
 //                }
     //$date = '2019-07-12';
-
     // $sps = \Nyos\mod\items::getItemsSimple($db, 'sale_point');
     $sps = \Nyos\mod\items::get($db, 'sale_point');
     //\f\pa($sps);
@@ -814,8 +812,6 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_for_sps
 //            break;
 //        }
 //    }
-
-
 //\f\pa($_SERVER);
     //\f\pa($_SERVER['REDIRECT_QUERY_STRING']);
 
@@ -984,24 +980,26 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
 
             $e = 'Подгружаем данные по обороту ' . (!empty($sp_site_name) ? '(' . $sp_site_name . ')' : '' ) . ' за день ' . date('y-m-d', strtotime($date))
                     . PHP_EOL
-                    . ' oborot: ' . $ret['data']['oborot']
-                    . PHP_EOL
-                    . ' из них '
-                    . PHP_EOL
-                    . ' плюс: ' . $ret['data']['plus']
-                    . PHP_EOL
-                    . ' минус: ' . $ret['data']['minus']
-                    . PHP_EOL
+                    . ' плюс: ' . $ret['data']['plus'].' '. $ret['data']['minus'].' = '. $ret['data']['oborot']
             // . sizeof($in3);
             ;
+            
+            
+            if (!isset($_REQUEST['no_send_msg'])) {
+                
             \nyos\Msg::sendTelegramm($e, null, 1);
             //\f\pa($vv['admin_ajax_job']);
-            if (isset($vv['admin_ajax_job'])) {
-                foreach ($vv['admin_ajax_job'] as $k => $v) {
-                    //\nyos\Msg::sendTelegramm($e, $v);
-                    \nyos\Msg::sendTelegramm($e, $v);
+
+
+                if (isset($vv['admin_ajax_job'])) {
+                    foreach ($vv['admin_ajax_job'] as $k => $v) {
+                        //\nyos\Msg::sendTelegramm($e, $v);
+                        \nyos\Msg::sendTelegramm($e, $v);
+                    }
                 }
             }
+            
+            
         }
 
         die(\f\end2('оборот ' . $ret['data']['oborot'] . 'р', true, $ret));

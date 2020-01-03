@@ -64,6 +64,93 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server
 }
 
 // получаем со всех точек обороты за последние 4 дня, перезаписываем значения если нет значения
+elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server_last_days2') {
+
+    $sps = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_sale_point);
+
+    $return = \Nyos\mod\IikoOborot::getNoData($db, 30);
+    \f\pa($return, 2, '', 'чего не хватает');
+
+    $links = [];
+    if (!empty($return['data']['nodata'])) {
+        foreach ($return['data']['nodata'] as $sp => $v1) {
+            foreach ($v1 as $date => $v2) {
+                $links[] = [
+                    'sp' => $sp,
+                    'get_sp_load' => $sp,
+                    'date' => $date,
+                    'hide_form' => 'da',
+                    'no_send_msg' => 'da',
+                    'action' => 'get_oborot_for_sps'
+                ];
+            }
+        }
+    }
+
+// https://adomik.dev.uralweb.info/vendor/didrive_mod/iiko_oborot/1/didrive/ajax.php    
+// date=2019-12-09&hide_form=da&action=get_oborot_for_sps&get_sp_load=2229
+    // \f\pa($links,2);
+
+    $msg_txt = 'Массовая подгрузка оборотов';
+
+    \f\timer_start(47);
+    $ww = 0;
+    foreach ($links as $k => $gg) {
+
+        // echo '<br/>' . __LINE__;
+
+        if ($curl = curl_init()) { //инициализация сеанса
+            // echo '<br/>' . __LINE__;
+            //указываем адрес страницы
+            curl_setopt($curl, CURLOPT_URL, 'http://' . $_SERVER['HTTP_HOST'] . '/vendor/didrive_mod/iiko_oborot/1/didrive/ajax.php?' . http_build_query($gg));
+
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+            curl_setopt($curl, CURLOPT_HEADER, 0);
+
+            $result = curl_exec($curl); //выполнение запроса
+
+            curl_close($curl); //закрытие сеанса
+        }
+
+        // \f\pa($result);
+        $result1 = json_decode($result, true);
+        // echo '<Br/>'.$result1['data']['oborot'];
+        $timer = \f\timer_stop(47, 'ar');
+        // \f\pa(\f\timer_stop(47, 'ar'));
+        $ww++;
+        // echo '<br/>kk: '.$ww;
+
+        $msg_txt .= PHP_EOL . $sps[$gg['sp']]['head'] . ' ' . $gg['date'] . ' + ' . $result1['data']['oborot'] . ' р';
+
+        if ($ww >= 50 || $timer['sec'] > 10) {
+            break;
+        }
+    }
+
+    if ($ww == 0)
+        $msg_txt .= PHP_EOL . 'все обороты загружены, нечего грузить';
+
+    // \nyos\Msg::sendTelegramm($msg_txt, null, 1);
+    if (1 == 1 && class_exists('\\Nyos\\Msg')) {
+
+        if (!isset($vv['admin_ajax_job'])) {
+            require_once DR . '/sites/' . \Nyos\nyos::$folder_now . '/config.php';
+        }
+
+        \nyos\Msg::sendTelegramm($msg_txt, null, 1);
+
+        if (isset($vv['admin_ajax_job'])) {
+            foreach ($vv['admin_ajax_job'] as $k => $v) {
+                \Nyos\Msg::sendTelegramm($msg_txt, $v);
+            }
+        }
+    }
+
+    \f\end2('Обработано оборотов: ' . $ww, true, ['text' => $msg_txt, 'kolvo' => $ww, 'colvo_sec' => round($timer['sec'], 2)]);
+}
+
+// получаем со всех точек обороты за последние 4 дня, перезаписываем значения если нет значения
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server_last_days') {
 
     //echo __FILE__ . ' ' . __LINE__;
@@ -110,9 +197,9 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 
 
     \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid '
-    . ' ON mid.id_item = mi.id '
-    . ' AND mid.name = \'date\' '
-    . ' AND mid.value_date >= :ds '
+            . ' ON mid.id_item = mi.id '
+            . ' AND mid.name = \'date\' '
+            . ' AND mid.value_date >= :ds '
 //             . ' AND mid.value_date <= :df '
 //            . ' INNER JOIN `mitems-dops` mid2 '
 //            . ' ON mid2.id_item = mi.id '
@@ -123,15 +210,17 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 //    \Nyos\mod\items::$var_ar_for_1sql[':sp'] = $sp;
     \Nyos\mod\items::$var_ar_for_1sql[':ds'] = $dt;
 
+    \Nyos\mod\items::$show_sql = true;
+
     $now_oborot = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
     // \f\pa($now_oborot, 2, '', 'текущиий оборот за прошедшие даты по точкам');
 
     $est_dt = [];
     foreach ($now_oborot as $k => $v) {
 
-        \f\pa($v);
+        // \f\pa($v);
 
-        if (isset($v['date']) && $v['date'] >= $dt) {
+        if (isset($v['date']) && $v['date'] >= $dt && !empty($v['sale_point'])) {
             $est_dt[$v['sale_point']][$v['date']] = 1;
         }
     }
@@ -171,7 +260,7 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
     }
 
 //    \f\pa($txt,2,'','txt');
-    //\f\pa($indb,2,'','в базу');
+    \f\pa($indb, 2, '', 'в базу');
 
     \Nyos\mod\items::addNewSimples($db, 'sale_point_oborot', $indb);
 

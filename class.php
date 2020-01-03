@@ -744,6 +744,84 @@ class IikoOborot {
     }
 
     /**
+     * получаем массив точка продаж > дата в которых нет оборотов
+     * @param класс $db
+     * @param цифра $now_days
+     * сколько дней назад проверяем
+     * @return массив
+     */
+    public static function getNoData( $db, $now_days = 40 ) {
+
+        // $now_days = ( $_REQUEST['days'] ?? 4 );
+
+        $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * $now_days);
+
+        $return = [
+            'date_Start' => $dt,
+            'nodata' => []
+        ];
+
+
+        \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid '
+                . ' ON mid.id_item = mi.id '
+                . ' AND mid.name = \'date\' '
+                . ' AND mid.value_date >= :ds ';
+//             . ' AND mid.value_date <= :df '
+        \Nyos\mod\items::$var_ar_for_1sql[':ds'] = $dt;
+
+
+//            . ' INNER JOIN `mitems-dops` mid2 '
+//            . ' ON mid2.id_item = mi.id '
+//            . ' AND mid2.name = \'sale_point\' '
+//            . ' AND mid2.value = :sp '
+//    \Nyos\mod\items::$var_ar_for_1sql[':sp'] = $sp;
+        // \Nyos\mod\items::$show_sql = true;
+        $ob = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
+
+        foreach ($ob as $k => $v) {
+            if (!empty($v['sale_point']) && !empty($v['date'])) {
+
+                if (!empty($v['oborot_server']))
+                    $return['oborots_local'][$v['sale_point']][$v['date']]['server'] = ( $v['oborot_server'] ?? '' );
+
+                if (!empty($v['oborot_hand']))
+                    $return['oborots_local'][$v['sale_point']][$v['date']]['hand'] = ( $v['oborot_hand'] ?? '' );
+            }
+        }
+        // \f\pa($now_oborot, 2, '', 'текущиий оборот за прошедшие даты по точкам');
+
+        $sps = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_sale_point);
+
+        foreach ($sps as $k => $sp) {
+
+            // echo '<Br/><br/>начало обработки точки '.$sp['id'].' '.$sp['head'];
+
+            for ($i = 1; $i <= $now_days; $i++) {
+
+                $now_date = date('Y-m-d', $_SERVER['REQUEST_TIME'] - $i * 24 * 3600);
+
+                if (isset($return['oborots_local'][$sp['id']])) {
+
+                    if (isset($return['oborots_local'][$sp['id']][$now_date])) {
+                        // echo '<br/>есть дата ' . $now_date;
+                    } else {
+
+                        $return['nodata'][$sp['id']][$now_date] = null;
+                        // echo '<br/>нет даты ' . $now_date;
+                    }
+                } else {
+                    // echo '<br/>нет точки '.$sp['id'].' '.$sp['head'];
+                    break;
+                }
+
+                // \f\pa($v);
+            }
+        }
+
+        return \f\end3('точка дата данных которых нет', true, $return);
+    }
+
+    /**
      * получаем цифру оборота за день
      * @param type $db
      * @param type $sp
@@ -784,7 +862,7 @@ class IikoOborot {
         if (!empty($oborots))
             foreach ($oborots as $k => $v) {
 
-                if( !empty($v['oborot_hand']) )
+                if (!empty($v['oborot_hand']))
                     return $v['oborot_hand'];
 
                 return $v['oborot_server'];
