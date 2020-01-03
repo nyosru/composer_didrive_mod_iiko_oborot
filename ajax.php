@@ -74,13 +74,14 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 //                AND md1.name = \'id_tech_for_oborot\'
 //                AND md1.value IS NOT NULL 
 //        ';
-    $sp = \Nyos\mod\items::getItemsSimple($db, 'sale_point');
+    // $sp = \Nyos\mod\items::getItemsSimple($db, 'sale_point');
+    $sp = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_sale_point);
     //\f\pa($sp);
 
     $sp_for = [];
-    foreach ($sp['data'] as $k => $v) {
-        if (isset($v['dop']['id_tech_for_oborot'])) {
-            $sp_for[$v['id']] = $v['dop']['id_tech_for_oborot'];
+    foreach ($sp as $k => $v) {
+        if (isset($v['id_tech_for_oborot'])) {
+            $sp_for[$v['id']] = $v['id_tech_for_oborot'];
             $sp_head[$v['id']] = $v['head'];
         }
     }
@@ -93,7 +94,8 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 //    \Nyos\mod\items::$sql_itemsdop_add_where_array = array(
 //        ':dt' => date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4)
 //    );
-    $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4);
+    $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * ( $_REQUEST['days'] ?? 4 ));
+
 //    \Nyos\mod\items::$sql_itemsdop2_add_where = '
 //        INNER JOIN `mitems-dops` md1 
 //            ON 
@@ -102,13 +104,35 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 //                AND md1.value_date >= :dt
 //        ';
     //\Nyos\mod\items::$show_sql = true ;
-    $now_oborot = \Nyos\mod\items::getItemsSimple($db, 'sale_point_oborot');
+    // $now_oborot = \Nyos\mod\items::getItemsSimple($db, 'sale_point_oborot');
+
+
+
+
+    \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid '
+    . ' ON mid.id_item = mi.id '
+    . ' AND mid.name = \'date\' '
+    . ' AND mid.value_date >= :ds '
+//             . ' AND mid.value_date <= :df '
+//            . ' INNER JOIN `mitems-dops` mid2 '
+//            . ' ON mid2.id_item = mi.id '
+//            . ' AND mid2.name = \'sale_point\' '
+//            . ' AND mid2.value = :sp '
+//
+    ;
+//    \Nyos\mod\items::$var_ar_for_1sql[':sp'] = $sp;
+    \Nyos\mod\items::$var_ar_for_1sql[':ds'] = $dt;
+
+    $now_oborot = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
     // \f\pa($now_oborot, 2, '', 'текущиий оборот за прошедшие даты по точкам');
 
     $est_dt = [];
-    foreach ($now_oborot['data'] as $k => $v) {
-        if (isset($v['dop']['date']) && $v['dop']['date'] >= $dt) {
-            $est_dt[$v['dop']['sale_point']][$v['dop']['date']] = 1;
+    foreach ($now_oborot as $k => $v) {
+
+        \f\pa($v);
+
+        if (isset($v['date']) && $v['date'] >= $dt) {
+            $est_dt[$v['sale_point']][$v['date']] = 1;
         }
     }
 

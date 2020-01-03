@@ -791,29 +791,29 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_for_sps
 //                }
     //$date = '2019-07-12';
 
-    $sps = \Nyos\mod\items::getItemsSimple($db, 'sale_point');
+    // $sps = \Nyos\mod\items::getItemsSimple($db, 'sale_point');
+    $sps = \Nyos\mod\items::get($db, 'sale_point');
     //\f\pa($sps);
     //\Nyos\mod\items::$sql_items_add_where = ' mi.date != '.date( 'Y-m-d', $_SERVER['REQUEST_TIME'] );
 
     if (isset($_REQUEST['get_sp_load'])) {
-        foreach ($sps['data'] as $k => $v) {
-            if (isset($v['id']) && $v['id'] == $_REQUEST['get_sp_load'] && isset($v['dop']['id_tech_for_oborot'])) {
-                $get_sp_d = $v['dop']['id_tech_for_oborot'];
+        foreach ($sps as $k => $v) {
+            if (isset($v['id']) && $v['id'] == $_REQUEST['get_sp_load'] && isset($v['id_tech_for_oborot'])) {
+                $get_sp_d = $v['id_tech_for_oborot'];
                 $sp_site_id = $v['id'];
                 $sp_site_name = $v['head'];
             }
         }
     }
 
-    if (isset($_REQUEST['get_sp_load'])) {
-
-        $timers = \Nyos\mod\items::getItemsSimple($db, $mod_list_time_lastload);
-        //\f\pa($timers);
-        foreach ($timers['data'] as $k => $v) {
-            $time_sp_key = $v['head'];
-            break;
-        }
-    }
+//    if (isset($_REQUEST['get_sp_load'])) {
+//        $timers = \Nyos\mod\items::getItemsSimple($db, $mod_list_time_lastload);
+//        //\f\pa($timers);
+//        foreach ($timers['data'] as $k => $v) {
+//            $time_sp_key = $v['head'];
+//            break;
+//        }
+//    }
 
 
 //\f\pa($_SERVER);
@@ -890,9 +890,9 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
 //            <option >d12d22b8-753e-4b90-8aeb-d32246ae6057</option>
 //            <option >80d0cc1f-233a-432e-9db7-588e73a97e02</option>
 
-        foreach ($sps['data'] as $k => $v) {
-            if (!empty($v['dop']['id_tech_for_oborot']))
-                echo '<option value="' . $v['dop']['id_tech_for_oborot'] . '" >' . $v['head'] . '</option>';
+        foreach ($sps as $k => $v) {
+            if (!empty($v['id_tech_for_oborot']))
+                echo '<option value="' . $v['id_tech_for_oborot'] . '" >' . $v['head'] . '</option>';
         }
 
 
@@ -953,12 +953,14 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
         \Nyos\mod\IikoOborot::$show_html = false;
         $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp_id, $date);
 
-        // \f\pa($ret);
+//        \f\pa($ret);
+//        \f\pa($sp_id);
         // echo '<br/>' . __FILE__ . ' ' . __LINE__;
 
         \Nyos\mod\items::addNewSimple($db, 'sale_point_oborot', array(
             'date' => $date,
             'sale_point' => $sp_site_id,
+            //'sale_point' => $sp_id,
             'oborot_server' => $ret['data']['oborot']
         ));
 

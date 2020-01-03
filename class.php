@@ -783,6 +783,10 @@ class IikoOborot {
 
         if (!empty($oborots))
             foreach ($oborots as $k => $v) {
+
+                if( !empty($v['oborot_hand']) )
+                    return $v['oborot_hand'];
+
                 return $v['oborot_server'];
             }
 
@@ -794,7 +798,6 @@ class IikoOborot {
         $sps = \Nyos\mod\items::getItemsSimple($db, \Nyos\mod\JobDesc::$mod_sale_point);
 
         if (isset($sps['data'][$sp]) && !empty($sps['data'][$sp]['dop']['id_tech_for_oborot'])) {
-
 
 // получаем данные для конекта к удалённой бд
 
@@ -847,10 +850,9 @@ class IikoOborot {
         \Nyos\mod\items::$where2 = ' AND `id` = \'' . (int) $sp . '\' ';
         \Nyos\mod\items::$limit1 = true;
         \Nyos\mod\items::$where2dop = ' AND `name` = \'id_tech_for_oborot\' ';
-        
+
         $sp1 = \Nyos\mod\items::get($db, $mod_sp);
         // \f\pa($sp1);
-
         // $sp_id = $get_sp_d ?? $time_sp_key ?? $_REQUEST['key_iiko_from_sp'] ?? $_REQUEST['sp_key_iiko'] ?? false;
         // \f\pa($sp_id);
         // echo '<br/>'.__FILE__.' '.__LINE__;
@@ -862,7 +864,6 @@ class IikoOborot {
         $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp1['id_tech_for_oborot'], $date);
 
         // \f\pa($ret, '', '', 'oborot from server');
-
         // echo '<br/>' . __FILE__ . ' ' . __LINE__;
 
         \Nyos\mod\items::addNewSimple($db, $mod_sp_oborot, [
@@ -871,9 +872,8 @@ class IikoOborot {
             'oborot_server' => $ret['data']['oborot']
                 ]
         );
-        
+
         return $ret['data']['oborot'];
-        
     }
 
     public static function loadOborotFromServer($sp_key, $date) {
