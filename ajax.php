@@ -69,7 +69,7 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
     $sps = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_sale_point);
 
     $return = \Nyos\mod\IikoOborot::getNoData($db, 30);
-    \f\pa($return, 2, '', 'чего не хватает');
+    // \f\pa($return, 2, '', 'чего не хватает');
 
     $links = [];
     if (!empty($return['data']['nodata'])) {
@@ -99,18 +99,17 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 
         // echo '<br/>' . __LINE__;
 
-        if ($curl = curl_init()) { //инициализация сеанса
+        //инициализация сеанса
+        if ($curl = curl_init()) { 
             // echo '<br/>' . __LINE__;
             //указываем адрес страницы
             curl_setopt($curl, CURLOPT_URL, 'http://' . $_SERVER['HTTP_HOST'] . '/vendor/didrive_mod/iiko_oborot/1/didrive/ajax.php?' . http_build_query($gg));
-
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
             curl_setopt($curl, CURLOPT_HEADER, 0);
-
-            $result = curl_exec($curl); //выполнение запроса
-
-            curl_close($curl); //закрытие сеанса
+            //выполнение запроса
+            $result = curl_exec($curl); 
+            //закрытие сеанса
+            curl_close($curl); 
         }
 
         // \f\pa($result);
