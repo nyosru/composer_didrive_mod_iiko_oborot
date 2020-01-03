@@ -98,18 +98,17 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
     foreach ($links as $k => $gg) {
 
         // echo '<br/>' . __LINE__;
-
         //инициализация сеанса
-        if ($curl = curl_init()) { 
+        if ($curl = curl_init()) {
             // echo '<br/>' . __LINE__;
             //указываем адрес страницы
             curl_setopt($curl, CURLOPT_URL, 'http://' . $_SERVER['HTTP_HOST'] . '/vendor/didrive_mod/iiko_oborot/1/didrive/ajax.php?' . http_build_query($gg));
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($curl, CURLOPT_HEADER, 0);
             //выполнение запроса
-            $result = curl_exec($curl); 
+            $result = curl_exec($curl);
             //закрытие сеанса
-            curl_close($curl); 
+            curl_close($curl);
         }
 
         // \f\pa($result);
@@ -126,6 +125,8 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
             break;
         }
     }
+
+    $timer = \f\timer_stop(47, 'ar');
 
     if ($ww == 0)
         $msg_txt .= PHP_EOL . 'все обороты загружены, нечего грузить';
