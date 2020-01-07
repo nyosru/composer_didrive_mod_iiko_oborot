@@ -153,6 +153,8 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 // получаем со всех точек обороты за последние 4 дня, перезаписываем значения если нет значения
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server_last_days') {
 
+\f\pa($_REQUEST);
+    
     //echo __FILE__ . ' ' . __LINE__;
 //    \Nyos\mod\items::$sql_itemsdop2_add_where = '
 //        INNER JOIN `mitems-dops` md1 
@@ -181,7 +183,7 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 //    \Nyos\mod\items::$sql_itemsdop_add_where_array = array(
 //        ':dt' => date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * 4)
 //    );
-    $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * ( $_REQUEST['days'] ?? 4 ));
+    $dt = date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24 * ( $_REQUEST['days'] ?? 30 ));
 
 //    \Nyos\mod\items::$sql_itemsdop2_add_where = '
 //        INNER JOIN `mitems-dops` md1 
