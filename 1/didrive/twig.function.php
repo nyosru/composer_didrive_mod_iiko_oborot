@@ -29,7 +29,7 @@ $function = new Twig_SimpleFunction('iiko_oborot__get_oborots_on_sp', function (
 
     foreach ($oborots as $k => $v) {
         $re[$v['date']] = $v;
-        $re['summa'] += !empty($v['oborot_hand']) ? $v['oborot_hand'] : $v['oborot_server'];
+        $re['summa'] += $v['oborot_hand'] ?? $v['oborot_server'] ?? 0;
     }
 
     return $re;

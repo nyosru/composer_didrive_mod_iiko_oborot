@@ -58,7 +58,26 @@ foreach (\Nyos\Nyos::$menu as $k => $v) {
 
 // получаем данные по одной точке,
 // елси знаем кей иико точки продаж
-if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server') {
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server_date') {
+
+    $sps = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_sale_point );
+    //\f\pa($sps);
+    
+    if( !isset($sps[$_REQUEST['sp']]['id_tech_for_oborot']) )
+        die('22222');
+    
+    \Nyos\mod\IikoOborot::$show_html = true;
+    $e = \Nyos\mod\IikoOborot::loadOborotFromServer( $sps[$_REQUEST['sp']]['id_tech_for_oborot'], date('Y-m-d', strtotime($_REQUEST['date']) ) );
+    
+    \f\end2($e);
+    //\f\pa($e);
+    die();
+    
+    
+}
+
+// елси знаем кей иико точки продаж
+elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server') {
 
     \Nyos\mod\IikoOborot::loadOborotFromServer($_REQUEST['sp_key'], date('Y-m-d', $_SERVER['REQUEST_TIME'] - 3600 * 24));
 }
@@ -153,8 +172,6 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_se
 // получаем со всех точек обороты за последние 4 дня, перезаписываем значения если нет значения
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'get_oborot_from_server_last_days') {
 
-\f\pa($_REQUEST);
-    
     //echo __FILE__ . ' ' . __LINE__;
 //    \Nyos\mod\items::$sql_itemsdop2_add_where = '
 //        INNER JOIN `mitems-dops` md1 

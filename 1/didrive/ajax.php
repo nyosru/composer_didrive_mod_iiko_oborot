@@ -947,17 +947,27 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
     if ($sp_id !== false) {
 
         \Nyos\mod\IikoOborot::$show_html = false;
-        $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp_id, $date);
 
-//        \f\pa($ret);
+
+
+        try {
+
+            $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp_id, $date);
+        } catch ( \Exception $ex ) {
+            // echo $exc->getTraceAsString();
+            $ret = [];
+        }
+        // \f\pa($ret);
+
 //        \f\pa($sp_id);
         // echo '<br/>' . __FILE__ . ' ' . __LINE__;
 
+        if( !empty($date) && !empty($sp_site_id) )
         \Nyos\mod\items::addNewSimple($db, 'sale_point_oborot', array(
             'date' => $date,
             'sale_point' => $sp_site_id,
             //'sale_point' => $sp_id,
-            'oborot_server' => $ret['data']['oborot']
+            'oborot_server' => ( $ret['data']['oborot'] ?? 0 )
         ));
 
         /**
@@ -980,15 +990,15 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
 
             $e = 'Подгружаем данные по обороту ' . (!empty($sp_site_name) ? '(' . $sp_site_name . ')' : '' ) . ' за день ' . date('y-m-d', strtotime($date))
                     . PHP_EOL
-                    . ' плюс: ' . $ret['data']['plus'].' '. $ret['data']['minus'].' = '. $ret['data']['oborot']
+                    . ' плюс: ' . ( $ret['data']['plus'] ?? 'x' ) . ' ' . ( $ret['data']['minus'] ?? 'x' ) . ' = ' . ( $ret['data']['oborot'] ?? 'x' )
             // . sizeof($in3);
             ;
-            
-            
+
+
             if (!isset($_REQUEST['no_send_msg'])) {
-                
-            \nyos\Msg::sendTelegramm($e, null, 1);
-            //\f\pa($vv['admin_ajax_job']);
+
+                \nyos\Msg::sendTelegramm($e, null, 1);
+                //\f\pa($vv['admin_ajax_job']);
 
 
                 if (isset($vv['admin_ajax_job'])) {
@@ -998,11 +1008,9 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
                     }
                 }
             }
-            
-            
         }
 
-        die(\f\end2('оборот ' . $ret['data']['oborot'] . 'р', true, $ret));
+        die(\f\end2('оборот ' . ( $ret['data']['oborot'] ?? '-' ) . ' р', true, $ret));
     } else {
         //echo '<br/>' . __FILE__ . ' ' . __LINE__;
         die(\f\end2('не определена точка', false));
