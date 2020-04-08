@@ -948,32 +948,27 @@ b71407a7-d94d-423c-9eb7-e2d2a8884fa3
 
         \Nyos\mod\IikoOborot::$show_html = false;
 
+
+
         try {
 
             $ret = \Nyos\mod\IikoOborot::loadOborotFromServer($sp_id, $date);
-        } catch (\Exception $ex) {
+        } catch ( \Exception $ex ) {
             // echo $exc->getTraceAsString();
             $ret = [];
         }
         // \f\pa($ret);
+
 //        \f\pa($sp_id);
         // echo '<br/>' . __FILE__ . ' ' . __LINE__;
 
-        if (!empty($date) && !empty($sp_site_id)) {
-            
-            \Nyos\mod\items::deleteFromDops($db, \Nyos\mod\JobDesc::$mod_oborots, [
-                'date' => $date,
-                'sale_point' => $sp_site_id
-            ]);
-            
-            // \Nyos\mod\items::addNewSimple($db, 'sale_point_oborot', array(
-            \Nyos\mod\items::addNewSimple($db, \Nyos\mod\JobDesc::$mod_oborots, array(
-                'date' => $date,
-                'sale_point' => $sp_site_id,
-                //'sale_point' => $sp_id,
-                'oborot_server' => ( $ret['data']['oborot'] ?? 0 )
-            ));
-        }
+        if( !empty($date) && !empty($sp_site_id) )
+        \Nyos\mod\items::addNewSimple($db, 'sale_point_oborot', array(
+            'date' => $date,
+            'sale_point' => $sp_site_id,
+            //'sale_point' => $sp_id,
+            'oborot_server' => ( $ret['data']['oborot'] ?? 0 )
+        ));
 
         /**
          * пишем дату крайней загрузки
@@ -1747,7 +1742,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'load_checks_for_1jobma
         }
 
         \Nyos\mod\items::addNewSimple($db, '050.chekin_checkout', $indb);
-        $new_in++;
+        $new_in ++;
     }
 
     return \f\end2('загружено периодов ' . $new_in . ' ' . ( isset($_REQUEST['show_timer']) ? '<br/><br/>' . round(\f\timer::stop(), 3) . ' сек' : '' ), true);

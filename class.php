@@ -862,11 +862,7 @@ class IikoOborot {
         if (!empty($oborots))
             foreach ($oborots as $k => $v) {
             
-<<<<<<< HEAD
                 if (!empty($v['oborot_hand']))
-=======
-                if ( !empty($v['oborot_hand']) && $v['oborot_hand'] > 0 )
->>>>>>> f57a1367426cb1674041a77b431efe24e0413c1d
                     return $v['oborot_hand'];
 
                 return $v['oborot_server'] ?? 0;
