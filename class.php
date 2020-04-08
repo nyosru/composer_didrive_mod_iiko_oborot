@@ -857,15 +857,15 @@ class IikoOborot {
                 . ' AND mid2.name = \'sale_point\' AND mid2.value = \'' . $sp . '\' '
         ;
         $oborots = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
-        // \f\pa($oborots, '', '', 'oborots');
+         \f\pa($oborots, '', '', 'oborots');
 
         if (!empty($oborots))
             foreach ($oborots as $k => $v) {
-
+            
                 if (!empty($v['oborot_hand']))
                     return $v['oborot_hand'];
 
-                return $v['oborot_server'];
+                return $v['oborot_server'] ?? 0;
             }
 
         /**

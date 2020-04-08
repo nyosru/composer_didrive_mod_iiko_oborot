@@ -3,7 +3,6 @@
 /**
   определение функций для TWIG
  */
-
 $function = new Twig_SimpleFunction('iiko_oborot__get_oborots_on_sp', function ( $db, string $sp, string $date_start, string $date_finish ) {
 
     \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid '
@@ -20,16 +19,20 @@ $function = new Twig_SimpleFunction('iiko_oborot__get_oborots_on_sp', function (
     \Nyos\mod\items::$var_ar_for_1sql[':sp'] = $sp;
     \Nyos\mod\items::$var_ar_for_1sql[':ds'] = $date_start;
     \Nyos\mod\items::$var_ar_for_1sql[':df'] = $date_finish;
-    
+
     // \Nyos\mod\items::$where2dop = ' AND ( name ';
-    
+
     $oborots = \Nyos\mod\items::get($db, 'sale_point_oborot');
 
     $re = ['summa' => 0];
 
     foreach ($oborots as $k => $v) {
         $re[$v['date']] = $v;
-        $re['summa'] += $v['oborot_hand'] ?? $v['oborot_server'] ?? 0;
+        if (isset($v['oborot_hand']) && $v['oborot_hand'] > 0) {
+            $re['summa'] += $v['oborot_hand'];
+        } elseif (isset($v['oborot_server']) && $v['oborot_server'] > 0) {
+            $re['summa'] += $v['oborot_server'];
+        }
     }
 
     return $re;
