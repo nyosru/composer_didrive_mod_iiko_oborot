@@ -1,7 +1,11 @@
 {
     "name": "didrive_mod/iiko_oborot",
     "description": "обороты с ИИКО ",
+<<<<<<< HEAD
     "version": "1.0.0",
+=======
+    "version": "0.1.12",
+>>>>>>> f57a1367426cb1674041a77b431efe24e0413c1d
     
     "keywords": [
         "didrive", "module", "nyos", "uralweb.info"
