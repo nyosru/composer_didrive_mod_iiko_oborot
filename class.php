@@ -857,12 +857,12 @@ class IikoOborot {
                 . ' AND mid2.name = \'sale_point\' AND mid2.value = \'' . $sp . '\' '
         ;
         $oborots = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
-         \f\pa($oborots, '', '', 'oborots');
+        // \f\pa($oborots, '', '', 'oborots');
 
         if (!empty($oborots))
             foreach ($oborots as $k => $v) {
-            
-                if (!empty($v['oborot_hand']))
+
+                if (!empty($v['oborot_hand']) && $v['oborot_hand'] > 0)
                     return $v['oborot_hand'];
 
                 return $v['oborot_server'] ?? 0;
@@ -1553,7 +1553,10 @@ class IikoOborot {
                 echo '<tr>';
 
             if ($e['unmodifiable'] == 1) {
-                $re['receiptsSum2'] += (int) $e['receiptsSum'];
+                if (empty($re['receiptsSum2']))
+                    $re['receiptsSum2'] = 0;
+
+                $re['receiptsSum2'] = (int) $e['receiptsSum'];
             }
 
             foreach ($e as $k => $v) {
@@ -1564,8 +1567,13 @@ class IikoOborot {
                 if ($k == 'sumCard' || $k == 'sumCash')
                     $sum += $v;
 
-                if ($k == 'receiptsSum')
-                    $re['receiptsSum'] += $v;
+                if ($k == 'receiptsSum') {
+                    if (!empty($re['receiptsSum'])) {
+                        $re['receiptsSum'] += $v;
+                    } else {
+                        $re['receiptsSum'] = $v;
+                    }
+                }
             }
 
             if (self::$show_html === true)
