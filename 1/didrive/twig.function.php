@@ -5,33 +5,56 @@
  */
 $function = new Twig_SimpleFunction('iiko_oborot__get_oborots_on_sp', function ( $db, string $sp, string $date_start, string $date_finish ) {
 
-    \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid '
-            . ' ON mid.id_item = mi.id '
-            . ' AND mid.name = \'date\' '
-            . ' AND mid.value_date >= :ds '
-            . ' AND mid.value_date <= :df '
-            . ' INNER JOIN `mitems-dops` mid2 '
-            . ' ON mid2.id_item = mi.id '
-            . ' AND mid2.name = \'sale_point\' '
-            . ' AND mid2.value = :sp '
+    // старая версия
+    if (1 == 2) {
 
-    ;
-    \Nyos\mod\items::$var_ar_for_1sql[':sp'] = $sp;
-    \Nyos\mod\items::$var_ar_for_1sql[':ds'] = $date_start;
-    \Nyos\mod\items::$var_ar_for_1sql[':df'] = $date_finish;
+        \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` mid '
+                . ' ON mid.id_item = mi.id '
+                . ' AND mid.name = \'date\' '
+                . ' AND mid.value_date >= :ds '
+                . ' AND mid.value_date <= :df '
+                . ' INNER JOIN `mitems-dops` mid2 '
+                . ' ON mid2.id_item = mi.id '
+                . ' AND mid2.name = \'sale_point\' '
+                . ' AND mid2.value = :sp '
 
-    // \Nyos\mod\items::$where2dop = ' AND ( name ';
+        ;
+        \Nyos\mod\items::$var_ar_for_1sql[':sp'] = $sp;
+        \Nyos\mod\items::$var_ar_for_1sql[':ds'] = $date_start;
+        \Nyos\mod\items::$var_ar_for_1sql[':df'] = $date_finish;
 
-    $oborots = \Nyos\mod\items::get($db, 'sale_point_oborot');
+        // \Nyos\mod\items::$where2dop = ' AND ( name ';
+
+        // echo '<br/>#'.__LINE__;
+        // \Nyos\mod\items::$show_sql = true;
+        $oborots = \Nyos\mod\items::get($db, 'sale_point_oborot');
+    }
+
+//    \Nyos\mod\items::$cancel_cash = true;
+//    \Nyos\mod\items::$show_sql = true;
+//    \Nyos\mod\items::$timer_show = true;
+
+//    \Nyos\mod\items::$var_ar_for_1sql2 = [];
+
+    \Nyos\mod\items::$search['sale_point'] = $sp;
+    \Nyos\mod\items::$between_date['date'] = [$date_start, $date_finish];
+
+    // $oborots = \Nyos\mod\items::get($db, 'sale_point_oborot');
+
+    //\Nyos\mod\items::$show_sql = true;
+    $oborots = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
+    // \f\pa($oborots, '', '', '$oborots');
 
     $re = ['summa' => 0];
 
     foreach ($oborots as $k => $v) {
-        $re[$v['date']] = $v;
-        if (isset($v['oborot_hand']) && $v['oborot_hand'] > 0) {
-            $re['summa'] += $v['oborot_hand'];
-        } elseif (isset($v['oborot_server']) && $v['oborot_server'] > 0) {
-            $re['summa'] += $v['oborot_server'];
+        if (isset($v['date'])) {
+            $re[$v['date']] = $v;
+            if (isset($v['oborot_hand']) && $v['oborot_hand'] > 0) {
+                $re['summa'] += $v['oborot_hand'];
+            } elseif (isset($v['oborot_server']) && $v['oborot_server'] > 0) {
+                $re['summa'] += $v['oborot_server'];
+            }
         }
     }
 
