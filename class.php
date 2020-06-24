@@ -38,6 +38,12 @@ class IikoOborot {
     public static $db_pass = '';
     public static $db_connect = null;
     public static $show_html = false;
+    /**
+     * кеш для дневного оборота на точках
+     * self::getOborotMonth
+     * @var массив
+     */
+    public static $cash_oborot_day_ar_sp_date = [];
 
     public static function connectDb() {
 
@@ -657,90 +663,19 @@ class IikoOborot {
 
         $date_finish = date('Y-m-d', strtotime($date_start . ' +1 month -1 day'));
 
-        if (1 == 1) {
+        \Nyos\mod\items::$between_date['date'] = [$date_start, $date_finish];
+        \Nyos\mod\items::$search['sale_point'] = $sp;
+        $oborots = \Nyos\mod\items::get($db, $mod_oborot);
+        //\f\pa($oborots,2,'','ob3');
 
-            \Nyos\mod\items::$join_where = ' INNER JOIN `mitems-dops` md ON '
-                    . ' `md`.`id_item` = mi.id '
-                    . 'AND `md`.`name` = \'date\' '
-                    . 'AND `md`.`value_date` >= \'' . $date_start . '\'  '
-                    . 'AND `md`.`value_date` <= \'' . $date_finish . '\'  '
-                    . ' INNER JOIN `mitems-dops` md2 ON '
-                    . ' `md2`.`id_item` = mi.id '
-                    . 'AND `md2`.`name` = \'sale_point\' '
-                    . 'AND `md2`.`value` = \'' . $sp . '\' ';
-            $oborots = \Nyos\mod\items::getItemsSimple3($db, $mod_oborot);
-//    echo '<pre>';
-//    \f\pa($oborots,2);
-//    echo '</pre>';
-            // $re = ['summa' => 0];
-            self::$cash[$sp][$date_start] = 0;
+        self::$cash[$sp][$date_start] = 0;
 
-            foreach ($oborots as $k => $v) {
-                if (
-                        isset($v['sale_point']) &&
-                        $v['sale_point'] == $sp &&
-                        isset($v['date']) &&
-                        $v['date'] >= $date_start &&
-                        $v['date'] <= $date_finish
-                ) {
-
-                    // $re[$v['dop']['date']] = $v['dop'];
-                    // $re[$v['dop']['date']] = $v['dop']['oborot_server'];
-                    // $re[$v['dop']['date']]['id'] = $v['id'];
-
-                    self::$cash[$sp][$date_start] += $v['oborot_server'];
-                } else {
-                    echo '<br/>' . __LINE__;
-                }
-            }
-        } else {
-
-            $oborots = \Nyos\mod\items::getItemsSimple($db, $mod_oborot);
-//    echo '<pre>';
-//    \f\pa($oborots,2);
-//    echo '</pre>';
-            // $re = ['summa' => 0];
-            self::$cash[$sp][$date_start] = 0;
-
-            foreach ($oborots['data'] as $k => $v) {
-                if (
-                        isset($v['dop']['sale_point']) &&
-                        $v['dop']['sale_point'] == $sp &&
-                        isset($v['dop']['date']) &&
-                        $v['dop']['date'] >= $date_start &&
-                        $v['dop']['date'] <= $date_finish
-                ) {
-
-                    // $re[$v['dop']['date']] = $v['dop'];
-                    // $re[$v['dop']['date']] = $v['dop']['oborot_server'];
-                    // $re[$v['dop']['date']]['id'] = $v['id'];
-
-                    self::$cash[$sp][$date_start] += $v['dop']['oborot_server'];
-                }
-            }
-
-//    foreach ($oborots['data'] as $k => $v) {
-//        if (isset($v['dop'])) {
-//            
-//        }
-//    }
+        foreach ($oborots as $k => $v) {
+            self::$cash_oborot_day_ar_sp_date[$v['sale_point']][$v['date']] = $v['oborot_hand'] ?? $v['oborot_server'] ?? 0;
+            self::$cash[$v['sale_point']][$date_start] += $v['oborot_hand'] ?? $v['oborot_server'] ?? 0;
         }
 
-
         return self::$cash[$sp][$date_start];
-
-
-
-
-
-
-
-
-        return \f\end3('получили данные по обороту точки', true, array(
-            'oborot' => (int) ( $sum + $sum2 ),
-            'plus' => (int) $sum,
-            'minus' => (int) $sum2
-        ));
     }
 
     /**
@@ -856,6 +791,7 @@ class IikoOborot {
                 . ' INNER JOIN `mitems-dops` mid2 ON mid2.id_item = mi.id '
                 . ' AND mid2.name = \'sale_point\' AND mid2.value = \'' . $sp . '\' '
         ;
+        // \Nyos\mod\items::$search['sale_point'] = $sp;
         $oborots = \Nyos\mod\items::get($db, \Nyos\mod\JobDesc::$mod_oborots);
         // \f\pa($oborots, '', '', 'oborots');
 
